@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { NotebookPen } from 'lucide-react';
 import Avatar from './Avatar';
 
 function useServerStatus() {
@@ -28,7 +29,7 @@ function useServerStatus() {
   return status;
 }
 
-export default function ChatHeader() {
+export default function ChatHeader({ notas }) {
   const status = useServerStatus();
 
   const dot = status === 'online' ? 'bg-emerald-500' : status === 'checking' ? 'bg-slate-300' : 'bg-amber-500';
@@ -36,8 +37,8 @@ export default function ChatHeader() {
     status === 'checking'
       ? 'Conectando…'
       : status === 'online'
-        ? 'IA local conectada'
-        : 'Modo demo (sin IA)';
+        ? 'En línea'
+        : 'Reconectando…';
 
   return (
     <header className="hidden h-16 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 sm:flex sm:px-6">
@@ -49,7 +50,13 @@ export default function ChatHeader() {
           {label}
         </p>
       </div>
-      <div className="ml-auto hidden sm:block">
+      <div className="ml-auto hidden items-center gap-2 sm:flex">
+        {notas && notas.length > 0 && (
+          <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
+            <NotebookPen className="h-3.5 w-3.5" />
+            {notas.length} {notas.length === 1 ? 'nota' : 'notas'}
+          </div>
+        )}
         <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600 ring-1 ring-inset ring-brand-100">
           PainHunter
         </span>

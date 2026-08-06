@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { MessageSquare, Pencil, Plus, Sparkles, Trash2, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { LogOut, MessageSquare, Pencil, Plus, Shield, Sparkles, Trash2, X } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import ConfirmModal from './ConfirmModal';
 
 export default function Sidebar({
@@ -12,6 +14,8 @@ export default function Sidebar({
   open,
   onClose,
 }) {
+  const { user, logout, isAdmin, role } = useAuth();
+  const navigate = useNavigate();
   const [editingId, setEditingId] = useState(null);
   const [draft, setDraft] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -129,10 +133,38 @@ export default function Sidebar({
         )}
       </div>
 
-      <div className="border-t border-white/10 p-4 text-xs text-white/60">
-        <p className="flex items-center gap-1.5">
+      <div className="border-t border-white/10 p-4">
+        {user?.email && (
+          <p className="mb-2 truncate text-xs text-white/60" title={`${user.email} | ${user.displayName || ''}`}>
+            {user.email}
+            {user.displayName ? ` | ${user.displayName}` : ''}
+          </p>
+        )}
+        {isAdmin && (
+          <button
+            onClick={() => {
+              navigate('/admin');
+              onClose();
+            }}
+            className="mb-1 flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
+          >
+            <Shield className="h-4 w-4" />
+            Panel de administración
+            <span className="ml-auto rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+              {role}
+            </span>
+          </button>
+        )}
+        <button
+          onClick={logout}
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
+        >
+          <LogOut className="h-4 w-4" />
+          Cerrar sesión
+        </button>
+        <p className="mt-3 flex items-center gap-1.5 text-xs text-white/60">
           <Sparkles className="h-3.5 w-3.5 text-white/80" />
-          Mr Hunter · Asistente de IA
+          PainHunter : chat
         </p>
       </div>
     </>

@@ -26,6 +26,10 @@ venv/
 # AI models (large files, not for GitHub)
 server/models/*.gguf
 
+# Credentials
+*.txt
+.env
+
 # Logs
 *.log
 npm-debug.log*

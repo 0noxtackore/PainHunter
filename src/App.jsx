@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import { useChat } from './hooks/useChat';
+import { usePageTitle } from './hooks/usePageTitle';
 import Sidebar from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
 import Messages from './components/Messages';
@@ -13,6 +14,7 @@ export default function App() {
     conversations,
     activeConversationId,
     messages,
+    notas,
     loading,
     sendMessage,
     startNewChat,
@@ -20,6 +22,8 @@ export default function App() {
     deleteConversation,
     renameConversation,
   } = useChat();
+
+  usePageTitle('Chat');
 
   const closeSidebar = () => setSidebarOpen(false);
 
@@ -55,7 +59,7 @@ export default function App() {
           </button>
         </div>
         <div className="h-12 shrink-0 bg-transparent md:hidden" />
-        <ChatHeader />
+        <ChatHeader notas={notas} />
         {messages.length > 0 ? (
           <Messages messages={messages} loading={loading} />
         ) : (
