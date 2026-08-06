@@ -63,7 +63,7 @@ export default function App() {
         {messages.length > 0 ? (
           <Messages messages={messages} loading={loading} />
         ) : (
-          <div className="flex-1 overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto">
             <WelcomeScreen onPick={sendMessage} />
           </div>
         )}
