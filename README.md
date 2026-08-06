@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/img/logo_solid.png" alt="PainHunter" width="200" />
+  <img src="public/img/logo_solid.png" alt="PainHunter" width="100%" />
 </p>
 
 <h1 align="center">PainHunter</h1>
@@ -60,17 +60,17 @@ A supervision panel lets **super users** (Admin, Guard, Boss) inspect users, con
 
 ## Features
 
-- 💬 **Chat with Mr Hunter** — an empathetic interviewer that asks one open question at a time.
-- 🤖 **Local AI (private)** — Qwen 1.5B / 0.5B GGUF models served by a Python FastAPI backend.
-- 🎙️ **Voice transcription** — audio messages transcribed with `faster-whisper` (Whisper).
-- 📝 **Automatic pain notes** — the model emits structured notes (`###NOTAS###`) extracted at stream time.
-- 🩺 **Pain detection & classification** — `es_dolor` flag from AI decision plus keyword matching.
-- 🧾 **AI conclusion & recommendation** — generated at the end of every conversation.
-- 🔐 **Authentication** — Firebase Auth (email/password) with registration.
-- 🗃️ **Realtime Database** — users, conversations, notes, and admin roles in Firebase RTDB.
-- 👑 **Super-user panel** — Admin, Guard and Boss roles with stats and conversation inspection.
-- 🔔 **Toast notifications** — global notification system.
-- 🌐 **Landing page** — official marketing page with hero, features, testimonials and FAQ.
+- **Chat with Mr Hunter** — an empathetic interviewer that asks one open question at a time.
+- **Local AI (private)** — Qwen 1.5B / 0.5B GGUF models served by a Python FastAPI backend.
+- **Voice transcription** — audio messages transcribed with `faster-whisper` (Whisper).
+- **Automatic pain notes** — the model emits structured notes (`###NOTAS###`) extracted at stream time.
+- **Pain detection & classification** — `es_dolor` flag from AI decision plus keyword matching.
+- **AI conclusion & recommendation** — generated at the end of every conversation.
+- **Authentication** — Firebase Auth (email/password) with registration.
+- **Realtime Database** — users, conversations, notes, and admin roles in Firebase RTDB.
+- **Super-user panel** — Admin, Guard and Boss roles with stats and conversation inspection.
+- **Toast notifications** — global notification system.
+- **Landing page** — official marketing page with hero, features, testimonials and FAQ.
 
 ---
 
@@ -329,7 +329,7 @@ npm run build
 
 ### Backend
 
-> ⚠️ Netlify **cannot** run the Python AI backend (persistent process, local GGUF model, no GPU/CPU guarantees).
+> **Note:** Netlify **cannot** run the Python AI backend (persistent process, local GGUF model, no GPU/CPU guarantees).
 
 To make the AI work in production you have to host the FastAPI backend elsewhere:
 

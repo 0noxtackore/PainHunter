@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/img/logo_solid.png" alt="PainHunter" width="200" />
+  <img src="public/img/logo_solid.png" alt="PainHunter" width="100%" />
 </p>
 
 <h1 align="center">PainHunter</h1>
@@ -60,17 +60,17 @@ Un panel de supervisión permite a los **superusuarios** (Admin, Vigilante, Boss
 
 ## Características
 
-- 💬 **Chat con Mr Hunter** — un entrevistador empático que hace una sola pregunta abierta a la vez.
-- 🤖 **IA local (privada)** — modelos Qwen 1.5B / 0.5B en GGUF servidos por un backend Python con FastAPI.
-- 🎙️ **Transcripción de voz** — mensajes de audio transcritos con `faster-whisper` (Whisper).
-- 📝 **Notas de dolor automáticas** — el modelo emite notas estructuradas (`###NOTAS###`) extraídas en tiempo real durante el streaming.
-- 🩺 **Detección y clasificación de dolor** — bandera `es_dolor` a partir de la decisión de la IA más coincidencia de palabras clave.
-- 🧾 **Conclusión y recomendación de IA** — generadas al final de cada conversación.
-- 🔐 **Autenticación** — Firebase Auth (correo/contraseña) con registro.
-- 🗃️ **Base de datos en tiempo real** — usuarios, conversaciones, notas y roles de administrador en Firebase RTDB.
-- 👑 **Panel de superusuarios** — roles Admin, Vigilante y Boss con estadísticas e inspección de conversaciones.
-- 🔔 **Notificaciones toast** — sistema global de notificaciones.
-- 🌐 **Landing page** — página oficial de marketing con hero, características, testimonios y FAQ.
+- **Chat con Mr Hunter** — un entrevistador empático que hace una sola pregunta abierta a la vez.
+- **IA local (privada)** — modelos Qwen 1.5B / 0.5B en GGUF servidos por un backend Python con FastAPI.
+- **Transcripción de voz** — mensajes de audio transcritos con `faster-whisper` (Whisper).
+- **Notas de dolor automáticas** — el modelo emite notas estructuradas (`###NOTAS###`) extraídas en tiempo real durante el streaming.
+- **Detección y clasificación de dolor** — bandera `es_dolor` a partir de la decisión de la IA más coincidencia de palabras clave.
+- **Conclusión y recomendación de IA** — generadas al final de cada conversación.
+- **Autenticación** — Firebase Auth (correo/contraseña) con registro.
+- **Base de datos en tiempo real** — usuarios, conversaciones, notas y roles de administrador en Firebase RTDB.
+- **Panel de superusuarios** — roles Admin, Vigilante y Boss con estadísticas e inspección de conversaciones.
+- **Notificaciones toast** — sistema global de notificaciones.
+- **Landing page** — página oficial de marketing con hero, características, testimonios y FAQ.
 
 ---
 
@@ -329,7 +329,7 @@ npm run build
 
 ### Backend
 
-> ⚠️ Netlify **no puede** ejecutar el backend de IA en Python (proceso persistente, modelo GGUF local, sin garantías de CPU/GPU).
+> **Nota:** Netlify **no puede** ejecutar el backend de IA en Python (proceso persistente, modelo GGUF local, sin garantías de CPU/GPU).
 
 Para que la IA funcione en producción tienes que alojar el backend FastAPI en otro lugar:
 
