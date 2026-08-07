@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Award, Footprints, Sparkles, X } from 'lucide-react';
 import { levelFromXp, TROPHIES, DEFAULT_GAMIFICATION } from '../services/gamificationService';
 
@@ -49,6 +49,19 @@ function TrophiesModal({ open, trophies, onClose }) {
 
 export default function GamificationBar({ gamification, pending }) {
   const [showTrophies, setShowTrophies] = useState(false);
+  const audioRef = useRef(null);
+  const prevPendingRef = useRef(false);
+
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio('/sounds/coins.mp3');
+    }
+    if (pending && !prevPendingRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    }
+    prevPendingRef.current = Boolean(pending);
+  }, [pending]);
 
   const data = { ...DEFAULT_GAMIFICATION, ...(gamification || {}) };
   const progress = useMemo(() => {
