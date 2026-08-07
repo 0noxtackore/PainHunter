@@ -17,24 +17,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { checkAccountRole } from '../services/adminService';
-function AuthError({ message }) {
-  const map = {
-    'auth/invalid-email': 'El correo electrónico no es válido.',
-    'auth/user-not-found': 'No existe una cuenta con este correo.',
-    'auth/wrong-password': 'La contraseña es incorrecta.',
-    'auth/invalid-credential': 'Correo o contraseña incorrectos.',
-    'auth/email-already-in-use': 'Ya existe una cuenta con este correo.',
-    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
-    'auth/too-many-requests': 'Demasiados intentos. Espera un momento e inténtalo de nuevo.',
-    'auth/network-request-failed': 'Error de conexión. Revisa tu internet.',
-  };
-  return message ? (
-    <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs font-medium text-red-600">
-      <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
-      <span>{map[message.code] || message.message || 'Ha ocurrido un error. Inténtalo de nuevo.'}</span>
-    </div>
-  ) : null;
-}
+import AlertModal from '../components/AlertModal';
 
 function Field({ label, children }) {
   return (
@@ -280,8 +263,6 @@ export default function AuthPage({ mode }) {
                 </div>
               </Field>
 
-              <AuthError message={error?.message} />
-
               <button
                 type="submit"
                 disabled={busy}
@@ -321,6 +302,13 @@ export default function AuthPage({ mode }) {
           </div>
         </div>
       </div>
+
+      <AlertModal
+        open={Boolean(error?.message)}
+        title={isRegister ? 'No se pudo crear la cuenta' : 'No se pudo iniciar sesión'}
+        message={error?.message}
+        onClose={() => setError(null)}
+      />
     </div>
   );
 }

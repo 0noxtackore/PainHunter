@@ -13,15 +13,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { getRole } from '../services/adminService';
-
-function AuthError({ message }) {
-  return message ? (
-    <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs font-medium text-red-600">
-      <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
-      <span>{message}</span>
-    </div>
-  ) : null;
-}
+import AlertModal from '../components/AlertModal';
 
 function Field({ label, children }) {
   return (
@@ -191,8 +183,6 @@ export default function SuperUserLogin() {
                 </div>
               </Field>
 
-              <AuthError message={error?.message} />
-
               <button
                 type="submit"
                 disabled={busy}
@@ -205,6 +195,13 @@ export default function SuperUserLogin() {
           </div>
         </div>
       </div>
+
+      <AlertModal
+        open={Boolean(error?.message)}
+        title="No se pudo iniciar sesión"
+        message={error?.message}
+        onClose={() => setError(null)}
+      />
     </div>
   );
 }
