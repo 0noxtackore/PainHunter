@@ -3,9 +3,16 @@ import { NotebookPen } from 'lucide-react';
 import Avatar from './Avatar';
 
 function useServerStatus() {
-  const [status, setStatus] = useState('checking');
+  const [status, setStatus] = useState('online');
 
   useEffect(() => {
+    const isLocal =
+      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (!isLocal) {
+      setStatus('online');
+      return undefined;
+    }
+
     let cancelled = false;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 3000);
@@ -32,13 +39,8 @@ function useServerStatus() {
 export default function ChatHeader({ notas }) {
   const status = useServerStatus();
 
-  const dot = status === 'online' ? 'bg-emerald-500' : status === 'checking' ? 'bg-slate-300' : 'bg-amber-500';
-  const label =
-    status === 'checking'
-      ? 'Conectando…'
-      : status === 'online'
-        ? 'En línea'
-        : 'Reconectando…';
+  const dot = status === 'online' ? 'bg-emerald-500' : 'bg-amber-500';
+  const label = status === 'online' ? 'En línea' : 'Reconectando…';
 
   return (
     <header className="hidden h-16 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 sm:flex sm:px-6">
