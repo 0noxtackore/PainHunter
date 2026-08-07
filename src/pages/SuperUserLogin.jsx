@@ -191,7 +191,7 @@ export default function SuperUserLogin() {
                 </div>
               </Field>
 
-              <AuthError message={error} />
+              <AuthError message={error?.message} />
 
               <button
                 type="submit"

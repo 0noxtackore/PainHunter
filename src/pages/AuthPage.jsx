@@ -115,7 +115,7 @@ export default function AuthPage({ mode }) {
       await login(email.trim(), password);
       navigate('/chat');
     } catch (err) {
-      setError(err);
+      setError({ message: err?.message || 'Correo o contraseña incorrectos.' });
     } finally {
       setBusy(false);
     }
@@ -280,7 +280,7 @@ export default function AuthPage({ mode }) {
                 </div>
               </Field>
 
-              <AuthError message={error} />
+              <AuthError message={error?.message} />
 
               <button
                 type="submit"
