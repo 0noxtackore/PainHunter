@@ -11,6 +11,7 @@ import {
   deleteConversation as deleteStoredConversation,
 } from '../services/chatStorage';
 import { useAuth } from '../contexts/AuthContext';
+import { useGamification } from './useGamification';
 
 function createId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -30,6 +31,8 @@ export function useChat() {
   const { user } = useAuth();
   const uid = user?.uid;
   const userName = user?.displayName || '';
+
+  const { gamification, pending, rewardMessage, rewardConversation } = useGamification(uid);
 
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -171,6 +174,8 @@ export function useChat() {
       const withUser = [...currentMessages, userMessage];
       assistantTextRef.current = '';
 
+      rewardMessage(trimmed, { notes: 0 }).catch(() => {});
+
       if (!titledRef.current.has(conversationId)) {
         titledRef.current.add(conversationId);
         requestTitle(withUser)
@@ -213,6 +218,7 @@ export function useChat() {
                     : c
                 )
               );
+              rewardConversation({ notes: notes.length }).catch(() => {});
             }
           },
           userName
@@ -264,7 +270,7 @@ export function useChat() {
         setLoading(false);
       }
     },
-    [renameConversation, userName]
+    [renameConversation, userName, rewardMessage, rewardConversation]
   );
 
   return {
@@ -274,6 +280,8 @@ export function useChat() {
     notas: active?.notas || [],
     loading,
     title: active?.title || '',
+    gamification,
+    gamificationPending: pending,
     sendMessage,
     startNewChat,
     selectConversation,

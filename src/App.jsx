@@ -5,6 +5,7 @@ import { usePageTitle } from './hooks/usePageTitle';
 import { loadWhisper } from './services/whisperService';
 import Sidebar from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
+import GamificationBar from './components/GamificationBar';
 import Messages from './components/Messages';
 import ChatInput from './components/ChatInput';
 import WelcomeScreen from './components/WelcomeScreen';
@@ -22,6 +23,8 @@ export default function App() {
     messages,
     notas,
     loading,
+    gamification,
+    gamificationPending,
     sendMessage,
     startNewChat,
     selectConversation,
@@ -66,6 +69,7 @@ export default function App() {
         </div>
         <div className="h-12 shrink-0 bg-transparent md:hidden" />
         <ChatHeader notas={notas} />
+        <GamificationBar gamification={gamification} pending={gamificationPending} />
         {messages.length > 0 ? (
           <Messages messages={messages} loading={loading} />
         ) : (
