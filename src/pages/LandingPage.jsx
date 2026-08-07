@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Activity,
   ArrowRight,
+  Award,
   Brain,
   Check,
   ChevronDown,
@@ -44,6 +45,11 @@ const FEATURES = [
     icon: HeartPulse,
     title: 'Gana puntos con cada conversación',
     text: 'Cada entrevista con Mr Hunter te suma puntos y reconocimientos por tu participación y tus aportes.',
+  },
+  {
+    icon: Award,
+    title: 'Desbloquea trofeos',
+    text: 'Sube de nivel y desbloquea trofeos a medida que conversas, compartes tus obstáculos y mantienes tu constancia.',
   },
 ];
 

@@ -31,7 +31,7 @@ const BRAND_FEATURES = [
   {
     icon: HeartPulse,
     title: 'Detecta obstáculos',
-    text: 'Identifica lo que te frena en el trabajo para ayudarte a avanzar.',
+    text: 'Conversa sobre lo que te frena en el trabajo y gana puntos por compartirlo.',
   },
   {
     icon: MessageCircle,
