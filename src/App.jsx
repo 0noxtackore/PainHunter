@@ -69,7 +69,7 @@ export default function App() {
             <Menu className="h-5 w-5" />
           </button>
         </div>
-        <div className="h-12 shrink-0 bg-transparent md:hidden" />
+        <div className="hidden" />
         <ChatHeader notas={notas} />
         <GamificationBar gamification={gamification} pending={gamificationPending} />
         {messages.length > 0 ? (
