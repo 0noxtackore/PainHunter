@@ -65,9 +65,6 @@ export async function transcribeWithWhisper(audioData, language = 'es') {
     language,
     task: 'transcribe',
     return_timestamps: false,
-    chunk_length_s: 30,
-    stride_length_s: 5,
-    condition_on_previous_text: false,
   });
   return (result?.text || '').trim();
 }
