@@ -19,7 +19,10 @@ export default function ChatInput({ onSend, disabled }) {
   const recordingIntentRef = useRef(false);
   const restartTimerRef = useRef(null);
 
-  const useBrowserSpeech = isSpeechRecognitionSupported();
+  const isLocal =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const useBrowserSpeech = !isLocal && isSpeechRecognitionSupported();
 
   useEffect(() => {
     return () => {
