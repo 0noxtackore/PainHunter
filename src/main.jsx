@@ -8,6 +8,7 @@ import AdminPanel from './pages/AdminPanel';
 import LandingPage from './pages/LandingPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
 
 function LoadingScreen() {
@@ -57,15 +58,17 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <AuthProvider>
       <ToastProvider>
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<PublicOnly><AuthPage mode="login" /></PublicOnly>} />
-            <Route path="/register" element={<PublicOnly><AuthPage mode="register" /></PublicOnly>} />
-            <Route path="/superusers" element={<SuperUserLogin />} />
-            <Route path="/admin" element={<AdminRoute />} />
-            <Route path="/chat" element={<ProtectedApp />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<PublicOnly><AuthPage mode="login" /></PublicOnly>} />
+              <Route path="/register" element={<PublicOnly><AuthPage mode="register" /></PublicOnly>} />
+              <Route path="/superusers" element={<SuperUserLogin />} />
+              <Route path="/admin" element={<AdminRoute />} />
+              <Route path="/chat" element={<ProtectedApp />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </ErrorBoundary>
         </BrowserRouter>
       </ToastProvider>
     </AuthProvider>

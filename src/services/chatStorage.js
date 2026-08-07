@@ -12,7 +12,11 @@ export function subscribeConversations(uid, callback) {
         callback([]);
         return;
       }
-      const list = Object.entries(raw).map(([id, data]) => ({ id, ...data }));
+      const list = Object.entries(raw).map(([id, data]) => ({
+        id,
+        ...data,
+        messages: Array.isArray(data.messages) ? data.messages : [],
+      }));
       list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       callback(list);
     },

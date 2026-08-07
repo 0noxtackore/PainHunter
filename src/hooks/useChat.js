@@ -163,7 +163,7 @@ export function useChat() {
       setConversations((prev) =>
         prev.map((c) =>
           c.id === conversationId
-            ? { ...c, messages: [...c.messages, userMessage, assistantMessage] }
+            ? { ...c, messages: [...(Array.isArray(c.messages) ? c.messages : []), userMessage, assistantMessage] }
             : c
         )
       );
@@ -189,15 +189,15 @@ export function useChat() {
             setConversations((prev) =>
               prev.map((c) =>
                 c.id === conversationId
-                  ? {
-                      ...c,
-                      messages: c.messages.map((m) =>
-                        m.id === assistantMessage.id
-                          ? { ...m, content: m.content + token, streaming: false }
-                          : m
-                      ),
-                    }
-                  : c
+              ? {
+                  ...c,
+                  messages: (Array.isArray(c.messages) ? c.messages : []).map((m) =>
+                    m.id === assistantMessage.id
+                      ? { ...m, content: m.content + token, streaming: false }
+                      : m
+                  ),
+                }
+              : c
               )
             );
           },
@@ -244,7 +244,7 @@ export function useChat() {
             c.id === conversationId
               ? {
                   ...c,
-                  messages: c.messages.map((m) =>
+                  messages: (Array.isArray(c.messages) ? c.messages : []).map((m) =>
                     m.id === assistantMessage.id
                       ? {
                           ...m,
