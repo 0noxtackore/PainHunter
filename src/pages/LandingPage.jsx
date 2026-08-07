@@ -23,7 +23,7 @@ const FEATURES = [
   {
     icon: MessageCircle,
     title: 'Conversa con Mr Hunter',
-    text: 'Un entrevistador de clima laboral que te pregunta por tu día a día, detecta los obstáculos y los registra para el diagnóstico del equipo.',
+    text: 'Un entrevistador de clima laboral que te pregunta por tu día a día, detecta los obstáculos y te hace ganar puntos por compartirlos.',
   },
   {
     icon: Activity,
@@ -306,7 +306,7 @@ export default function LandingPage() {
                   Me faltan licencias de un software y las aprobaciones tardan días.
                 </div>
                 <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-2.5 text-sm text-slate-700">
-                  Entiendo. Voy a registrar este obstáculo…
+                  Entiendo. Gracias por compartirlo, ganaste puntos por tu aporte.
                 </div>
                 <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3">
                   <span className="typing-dot h-2 w-2 rounded-full bg-brand-500" />
@@ -322,7 +322,7 @@ export default function LandingPage() {
                   <HeartPulse className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-800">Obstáculo registrado</p>
+                  <p className="text-xs font-bold text-slate-800">+25 puntos</p>
                   <p className="text-[10px] text-slate-500">Hace un momento</p>
                 </div>
               </div>
@@ -349,7 +349,7 @@ export default function LandingPage() {
               Todo lo que necesitas para un mejor clima laboral
             </h2>
             <p className="mt-3 text-slate-600">
-              PainHunter combina una IA local y privada con registro automático de obstáculos para
+              PainHunter combina una IA local y privada con un sistema de puntos y recompensas para
               mejorar cada día tu forma de trabajar.
             </p>
           </div>

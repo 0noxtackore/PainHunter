@@ -129,7 +129,7 @@ export default function AuthPage({ mode }) {
             <p className="mt-3 text-sm leading-relaxed text-white/70">
               {isRegister
                 ? 'Crea tu cuenta y conversa con Mr Hunter, tu entrevistador de clima laboral para conocer y mejorar tu día a día en el trabajo.'
-                : 'Continúa tu conversación con Mr Hunter y sigue tu registro de obstáculos.'}
+                : 'Continúa tu conversación con Mr Hunter y sigue sumando puntos.'}
             </p>
           </div>
 

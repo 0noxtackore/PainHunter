@@ -133,7 +133,7 @@ export default function GamificationBar({ gamification, pending }) {
                 </p>
               )}
               <p className="text-[11px] text-slate-500">
-                +{pending.huellas || 0} huellas {pending.painNotes ? '· observación registrada' : ''}
+                +{pending.huellas || 0} huellas {pending.painNotes ? '· bonus por compartir' : ''}
               </p>
             </div>
           </div>
