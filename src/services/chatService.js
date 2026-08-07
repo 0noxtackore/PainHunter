@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000/api/chat/stream';
+import { streamReply, generateTitle, generateConclusion } from './openRouterService';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function getLastUserMessage(conversation) {
@@ -53,52 +53,6 @@ function buildReply(conversation, userName) {
   return greet('te escucho y no juzgo nada de lo que compartas: tu experiencia es válida. Cuéntame con tus palabras qué está pasando: ¿es un dolor o cansancio, algo del trabajo, una pérdida o un conflicto con alguien? Por ahí podemos empezar.');
 }
 
-async function streamFromServer(conversation, onToken, onNotes, userName) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 120000);
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: conversation, user_name: userName || '' }),
-      signal: controller.signal,
-    });
-    if (!response.ok) throw new Error(`Local AI respondió ${response.status}`);
-    if (!response.body) throw new Error('Sin flujo de datos');
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-
-      let separator;
-      while ((separator = buffer.indexOf('\n\n')) !== -1) {
-        const event = buffer.slice(0, separator);
-        buffer = buffer.slice(separator + 2);
-        const line = event.trim();
-        if (!line.startsWith('data:')) continue;
-
-        const payload = line.slice(5).trim();
-        if (payload === '[DONE]') return;
-
-        try {
-          const data = JSON.parse(payload);
-          if (data.content) onToken(data.content);
-          if (data.notes && onNotes) onNotes(data.notes);
-        } catch {
-          /* evento ignorado */
-        }
-      }
-    }
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 export async function sendMessage(conversation, onToken, onNotes, userName) {
   let receivedAny = false;
   const wrappedToken = (token) => {
@@ -108,7 +62,7 @@ export async function sendMessage(conversation, onToken, onNotes, userName) {
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      await streamFromServer(conversation, wrappedToken, onNotes, userName);
+      await streamReply(conversation, wrappedToken, onNotes, userName);
       return;
     } catch {
       if (receivedAny) return;
@@ -142,52 +96,8 @@ export async function transcribeAudio(blob) {
   }
 }
 
-export async function generateConclusion(conversation, userName) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 30000);
-  try {
-    const response = await fetch('http://localhost:8000/api/conclusion', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: conversation, user_name: userName || '' }),
-      signal: controller.signal,
-    });
-    if (!response.ok) throw new Error('conclusion failed');
-    const data = await response.json();
-    return {
-      content: data.content || '',
-      esDolor: Boolean(data.es_dolor),
-      recomendacion: data.recomendacion || '',
-    };
-  } catch {
-    return { content: '', esDolor: false, recomendacion: '' };
-  } finally {
-    clearTimeout(timer);
-  }
+export async function getLastMessageContent(conversation) {
+  return getLastUserMessage(conversation);
 }
 
-export async function generateTitle(conversation) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 30000);
-  try {
-    const response = await fetch('http://localhost:8000/api/title', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: conversation }),
-      signal: controller.signal,
-    });
-    if (!response.ok) throw new Error('title failed');
-    const data = await response.json();
-    return data.content;
-  } catch {
-    const text = getLastUserMessage(conversation).toLowerCase();
-    if (/(cansancio|agotad|agotam|fatiga|agobiad)/.test(text)) return 'cansancio laboral';
-    if (/(jefe|superior|manager)/.test(text)) return 'problemas con mi jefe';
-    if (/(pérdida|perdida|perdí|fallecimiento|duelo)/.test(text)) return 'una pérdida reciente';
-    if (/(enemistad|compañero|compañera|conflicto|pelea|discusión)/.test(text)) return 'conflicto con un compañero';
-    if (/(estrés|estres|presión|presion)/.test(text)) return 'estrés y presión';
-    return 'conversación de apoyo';
-  } finally {
-    clearTimeout(timer);
-  }
-}
+export { generateTitle, generateConclusion };
