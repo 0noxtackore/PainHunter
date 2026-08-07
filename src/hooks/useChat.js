@@ -64,7 +64,13 @@ export function useChat() {
       return undefined;
     }
     return subscribeConversations(uid, (list) => {
-      if (list) setConversations(list);
+      if (!list) return;
+      setConversations(list);
+      setActiveId((current) => {
+        if (current && list.some((c) => c.id === current)) return current;
+        const mostRecent = list[0];
+        return mostRecent ? mostRecent.id : null;
+      });
     });
   }, [uid]);
 
