@@ -16,6 +16,8 @@ export default function ChatInput({ onSend, disabled }) {
   const chunksRef = useRef([]);
   const recognitionRef = useRef(null);
   const finalTextRef = useRef('');
+  const recordingIntentRef = useRef(false);
+  const restartTimerRef = useRef(null);
 
   const useBrowserSpeech = isSpeechRecognitionSupported();
 
@@ -29,6 +31,7 @@ export default function ChatInput({ onSend, disabled }) {
         }
         recognitionRef.current = null;
       }
+      if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
@@ -68,6 +71,8 @@ export default function ChatInput({ onSend, disabled }) {
 
   const stopRecording = () => {
     if (recognitionRef.current) {
+      recordingIntentRef.current = false;
+      if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
       try {
         recognitionRef.current.stop();
       } catch {
@@ -87,50 +92,64 @@ export default function ChatInput({ onSend, disabled }) {
   const startBrowserRecording = () => {
     setMicError('');
     setInterim('');
+    recordingIntentRef.current = true;
     finalTextRef.current = '';
-    const recognition = createSpeechRecognizer();
-    if (!recognition) return;
 
-    recognition.onresult = (event) => {
-      let interimText = '';
-      let finalText = '';
-      for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        const result = event.results[i];
-        const transcript = result[0]?.transcript || '';
-        if (result.isFinal) finalText += transcript;
-        else interimText += transcript;
-      }
-      if (finalText) finalTextRef.current += finalText;
-      setInterim(interimText);
-      const combined = (finalTextRef.current + interimText).trim();
-      if (combined) setValue(combined);
-    };
+    const beginListening = () => {
+      if (!recordingIntentRef.current) return;
+      const recognition = createSpeechRecognizer();
+      if (!recognition) return;
 
-    recognition.onerror = (event) => {
-      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        setMicError('No se pudo acceder al micrófono. Revisa los permisos del navegador.');
+      recognition.onresult = (event) => {
+        let interimText = '';
+        let finalText = '';
+        for (let i = event.resultIndex; i < event.results.length; i += 1) {
+          const result = event.results[i];
+          const transcript = result[0]?.transcript || '';
+          if (result.isFinal) finalText += transcript;
+          else interimText += transcript;
+        }
+        if (finalText) finalTextRef.current += finalText;
+        setInterim(interimText);
+        const combined = (finalTextRef.current + interimText).trim();
+        if (combined) setValue(combined);
+      };
+
+      recognition.onerror = (event) => {
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          recordingIntentRef.current = false;
+          if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+          setMicError('No se pudo acceder al micrófono. Revisa los permisos del navegador.');
+          setRecording(false);
+          setInterim('');
+          recognitionRef.current = null;
+        }
+      };
+
+      recognition.onend = () => {
+        recognitionRef.current = null;
+        if (!recordingIntentRef.current) {
+          setRecording(false);
+          setInterim('');
+          return;
+        }
+        if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+        restartTimerRef.current = setTimeout(beginListening, 300);
+      };
+
+      recognitionRef.current = recognition;
+      try {
+        recognition.start();
+        setRecording(true);
+      } catch {
+        recordingIntentRef.current = false;
+        setMicError('No se pudo iniciar el reconocimiento de voz.');
+        recognitionRef.current = null;
         setRecording(false);
-        setInterim('');
-      } else if (event.error === 'no-speech') {
-        setRecording(false);
-        setInterim('');
       }
     };
 
-    recognition.onend = () => {
-      recognitionRef.current = null;
-      setRecording(false);
-      setInterim('');
-    };
-
-    recognitionRef.current = recognition;
-    try {
-      recognition.start();
-      setRecording(true);
-    } catch {
-      setMicError('No se pudo iniciar el reconocimiento de voz.');
-      recognitionRef.current = null;
-    }
+    beginListening();
   };
 
   const startRecording = async () => {
