@@ -17,6 +17,7 @@ export function loadWhisper() {
   if (transcriberPromise) return transcriberPromise;
   loadProgress = { loaded: 0, total: 0, label: '' };
   transcriberPromise = pipeline('automatic-speech-recognition', MODEL_ID, {
+    dtype: 'fp32',
     progress_callback: (progress) => {
       loadProgress = progress;
     },
