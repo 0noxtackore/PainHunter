@@ -1,6 +1,12 @@
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '';
-const MODEL = import.meta.env.VITE_OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free';
+const MODEL = import.meta.env.VITE_OPENROUTER_MODEL || 'google/gemma-4-31b-it:free';
+const FALLBACK_MODELS = [
+  'google/gemma-4-31b-it:free',
+  'openai/gpt-oss-20b:free',
+  'nvidia/nemotron-3-nano-30b-a3b:free',
+  'inclusionai/ling-3.0-tiny:free',
+].filter((model) => model !== MODEL);
 
 const SYSTEM_PROMPT = [
   'Eres Mr Hunter, un entrevistador profesional, motivador y empatico que ayuda a empleados',
@@ -121,30 +127,53 @@ function fallbackNotes(conversation) {
     .map(() => lastUser.slice(0, 120));
 }
 
+function isRetryableStatus(status) {
+  return status === 429 || status === 404 || status === 503;
+}
+
 async function fetchCompletion(messages, options = {}) {
-  const response = await fetch(OPENROUTER_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${API_KEY}`,
-      'HTTP-Referer': window.location.origin,
-      'X-Title': 'PainHunter',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens ?? 512,
-      top_p: options.topP ?? 0.9,
-      stream: false,
-    }),
-  });
-  if (!response.ok) {
-    const detail = await response.text().catch(() => '');
-    throw new Error(`OpenRouter respondio ${response.status}: ${detail.slice(0, 200)}`);
+  const models = [options.model || MODEL, ...FALLBACK_MODELS];
+  let lastError = null;
+
+  for (const model of models) {
+    try {
+      const response = await fetch(OPENROUTER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${API_KEY}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'PainHunter',
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: options.temperature ?? 0.7,
+          max_tokens: options.maxTokens ?? 512,
+          top_p: options.topP ?? 0.9,
+          stream: false,
+        }),
+      });
+      if (!response.ok) {
+        if (isRetryableStatus(response.status)) {
+          lastError = new Error(`OpenRouter respondio ${response.status}`);
+          continue;
+        }
+        const detail = await response.text().catch(() => '');
+        throw new Error(`OpenRouter respondio ${response.status}: ${detail.slice(0, 200)}`);
+      }
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || '';
+      if (content.trim()) return content;
+      lastError = new Error('Respuesta vacia');
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableStatus(Number(error.message.match(/\d+/)?.[0]))) {
+        throw error;
+      }
+    }
   }
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || '';
+  throw lastError || new Error('Todos los modelos fallaron');
 }
 
 export async function streamReply(conversation, onToken, onNotes, userName) {
@@ -156,73 +185,90 @@ export async function streamReply(conversation, onToken, onNotes, userName) {
   }
 
   const messages = buildMessages(conversation, userName);
+  const models = [MODEL, ...FALLBACK_MODELS];
+  let lastError = null;
 
-  const response = await fetch(OPENROUTER_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${API_KEY}`,
-      'HTTP-Referer': window.location.origin,
-      'X-Title': 'PainHunter',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages,
-      temperature: 0.6,
-      max_tokens: 96,
-      top_p: 0.85,
-      stream: true,
-    }),
-  });
+  for (const model of models) {
+    try {
+      const response = await fetch(OPENROUTER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${API_KEY}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'PainHunter',
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.6,
+          max_tokens: 96,
+          top_p: 0.85,
+          stream: true,
+        }),
+      });
 
-  if (!response.ok) {
-    const detail = await response.text().catch(() => '');
-    throw new Error(`OpenRouter respondio ${response.status}: ${detail.slice(0, 200)}`);
-  }
-  if (!response.body) throw new Error('Sin flujo de datos');
+      if (!response.ok) {
+        lastError = new Error(`OpenRouter respondio ${response.status}`);
+        if (isRetryableStatus(response.status)) continue;
+        const detail = await response.text().catch(() => '');
+        throw new Error(`OpenRouter respondio ${response.status}: ${detail.slice(0, 200)}`);
+      }
+      if (!response.body) throw new Error('Sin flujo de datos');
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder('utf-8');
-  let buffer = '';
-  let content = '';
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let content = '';
+      let receivedAny = false;
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
 
-    let separator;
-    while ((separator = buffer.indexOf('\n\n')) !== -1) {
-      const event = buffer.slice(0, separator);
-      buffer = buffer.slice(separator + 2);
-      const line = event.trim();
-      if (!line.startsWith('data:')) continue;
+        let separator;
+        while ((separator = buffer.indexOf('\n\n')) !== -1) {
+          const event = buffer.slice(0, separator);
+          buffer = buffer.slice(separator + 2);
+          const line = event.trim();
+          if (!line.startsWith('data:')) continue;
 
-      const payload = line.slice(5).trim();
-      if (payload === '[DONE]') continue;
+          const payload = line.slice(5).trim();
+          if (payload === '[DONE]') continue;
 
-      try {
-        const data = JSON.parse(payload);
-        const delta = data.choices?.[0]?.delta?.content;
-        if (delta) {
-          content += delta;
-          onToken(delta);
+          try {
+            const data = JSON.parse(payload);
+            const delta = data.choices?.[0]?.delta?.content;
+            if (delta) {
+              receivedAny = true;
+              content += delta;
+              onToken(delta);
+            }
+          } catch {
+            /* evento ignorado */
+          }
         }
-      } catch {
-        /* evento ignorado */
+      }
+
+      if (content.trim()) {
+        const { notes } = parseNotes(content);
+        if (notes.length > 0 && onNotes) onNotes(notes);
+        else {
+          const fallback = fallbackNotes(conversation);
+          if (fallback.length > 0 && onNotes) onNotes(fallback);
+        }
+        return;
+      }
+      lastError = new Error('Respuesta vacia');
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableStatus(Number(error.message.match(/\d+/)?.[0]))) {
+        throw error;
       }
     }
   }
-
-  const { content: clean, notes } = parseNotes(content);
-  if (clean !== content) {
-    onToken(''); // no-op para mantener firma
-  }
-  if (notes.length > 0 && onNotes) onNotes(notes);
-  else {
-    const fallback = fallbackNotes(conversation);
-    if (fallback.length > 0 && onNotes) onNotes(fallback);
-  }
+  throw lastError || new Error('Todos los modelos fallaron');
 }
 
 export async function generateTitle(conversation) {
