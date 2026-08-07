@@ -82,8 +82,8 @@ export async function transcribeAudio(blob) {
   try {
     const text = await transcribeWithWhisper(blob);
     if (text) return text;
-  } catch {
-    /* fallback al backend local */
+  } catch (error) {
+    console.error('Whisper en navegador falló:', error);
   }
 
   const controller = new AbortController();
