@@ -36,11 +36,6 @@ const FEATURES = [
     text: 'Tu información se procesa localmente. Ningún dato tuyo sale de tu dispositivo.',
   },
   {
-    icon: Sparkles,
-    title: 'Recomendaciones accionables',
-    text: 'Recibe conclusiones y sugerencias concretas para mejorar tu trabajo al final de cada entrevista.',
-  },
-  {
     icon: ShieldCheck,
     title: '100% confidencial',
     text: 'Tus conversaciones son privadas y seguras. Solo tú tienes acceso a tu historial.',
@@ -82,7 +77,7 @@ const TESTIMONIALS = [
   {
     name: 'Carlos R.',
     role: 'Empleado del área de ventas',
-    text: 'Finalmente alguien que escucha mis problemas de herramientas. Las recomendaciones al final de cada entrevista me han ayudado a trabajar mejor.',
+    text: 'Finalmente alguien que escucha mis problemas de herramientas. Me ayuda a darme cuenta de lo que me frena en el día a día.',
   },
   {
     name: 'Lucía G.',
@@ -94,7 +89,7 @@ const TESTIMONIALS = [
 const FAQS = [
   {
     q: '¿Qué es Mr Hunter?',
-    a: 'Mr Hunter es tu entrevistador de clima laboral. Una IA que conversa contigo sobre tu día a día en el trabajo, detecta obstáculos, procesos pesados y fricciones, y te entrega conclusiones y recomendaciones al final de cada entrevista.',
+    a: 'Mr Hunter es tu entrevistador de clima laboral. Una IA que conversa contigo sobre tu día a día en el trabajo, detecta obstáculos, procesos pesados y fricciones, y te hace ganar puntos y reconocimientos por compartir tus experiencias.',
   },
   {
     q: '¿Mis datos son privados?',
@@ -242,8 +237,8 @@ export default function LandingPage() {
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600 lg:text-lg">
               Una plataforma de entrevista laboral que conversa contigo sobre tu día a día en el
-              trabajo, detecta los obstáculos que te frenan y te entrega conclusiones y
-              recomendaciones para mejorar al final de cada conversación.
+              trabajo, detecta los obstáculos que te frenan y te recompensa por compartir tus
+              experiencias y aportar al clima del equipo.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
