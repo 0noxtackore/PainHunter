@@ -1,4 +1,5 @@
 import { streamReply, generateTitle, generateConclusion } from './openRouterService';
+import { transcribeWithWhisper } from './whisperService';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function getLastUserMessage(conversation) {
@@ -78,6 +79,13 @@ export async function sendMessage(conversation, onToken, onNotes, userName) {
 }
 
 export async function transcribeAudio(blob) {
+  try {
+    const text = await transcribeWithWhisper(blob);
+    if (text) return text;
+  } catch {
+    /* fallback al backend local */
+  }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 60000);
   try {
