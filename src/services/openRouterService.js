@@ -3,8 +3,7 @@ const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '';
 const MODEL = import.meta.env.VITE_OPENROUTER_MODEL || 'google/gemma-4-31b-it:free';
 const FALLBACK_MODELS = [
   'google/gemma-4-31b-it:free',
-  'openai/gpt-oss-20b:free',
-  'nvidia/nemotron-3-nano-30b-a3b:free',
+  'google/gemma-4-26b-a4b-it:free',
   'inclusionai/ling-3.0-tiny:free',
 ].filter((model) => model !== MODEL);
 
@@ -43,6 +42,11 @@ const SYSTEM_PROMPT = [
   'Tu respuesta aqui. ###NOTAS### ["Le molesta la carga de trabajo", "Lleva 3 meses con cansancio"].',
   'Es obligatorio agregar ###NOTAS### siempre que el usuario mencione datos como tiempo, nombres,',
   'sentimientos fuertes o detalles concretos de su problema. Si no hay nada, no lo agregues.',
+  '\n\nRESPUESTA DIRECTA:',
+  'Responde DIRECTAMENTE con tu mensaje para el usuario. JAMAS muestres tu razonamiento interno,',
+  'JAMAS analices las instrucciones en voz alta, JAMAS empieces con frases como "We need to",',
+  '"The user says", "Let\'s craft", "As per instructions" ni ninguna explicacion en ingles o espanol',
+  'sobre lo que vas a hacer. Tu mensaje es la conversacion directa, nada mas.',
 ].join('\n');
 
 function buildSystemPrompt(userName) {
@@ -89,6 +93,28 @@ function getLastUserMessage(conversation) {
     if (conversation[index].role === 'user') return conversation[index].content;
   }
   return '';
+}
+
+const REASONING_PATTERNS = [
+  /^we need to/i,
+  /^the user (says|writes|mentions|is)/i,
+  /^let'?s (craft|write|respond|do)/i,
+  /^as per (the )?instructions/i,
+  /^the response must/i,
+  /^i should/i,
+];
+
+function stripReasoning(text) {
+  const clean = (text || '').trim();
+  if (!clean) return '';
+  for (const pattern of REASONING_PATTERNS) {
+    if (pattern.test(clean)) {
+      const sentences = clean.split(/(?<=[.!?])\s+/);
+      const finalSentence = sentences[sentences.length - 1];
+      return finalSentence && finalSentence.length > 3 ? finalSentence.trim() : '';
+    }
+  }
+  return clean;
 }
 
 function parseNotes(text) {
@@ -281,14 +307,16 @@ export async function generateTitle(conversation) {
     'Eres un asistente que pone titulos cortos a conversaciones de apoyo emocional y laboral. ' +
     'El idioma SIEMPRE es español: esta es la regla mas importante, aunque el usuario escriba en otro idioma ' +
     'el titulo debe estar en español. Basandote en lo que el usuario cuenta, genera un titulo de MAXIMO 5 ' +
-    'palabras en español, en minusculas y sin puntuacion. Solo responde con el titulo en español, nada mas.\n\n' +
+    'palabras en español, en minusculas y sin puntuacion. ' +
+    'Responde DIRECTAMENTE con el titulo, JAMAS expliques tu razonamiento ni analices la instruccion en voz alta. ' +
+    'Solo responde con el titulo en español, nada mas.\n\n' +
     `Lo que el usuario ha contado: "${userTexts}"\n\nTitulo en español:`;
   const content = await fetchCompletion([{ role: 'user', content: prompt }], {
     temperature: 0.3,
     maxTokens: 20,
     topP: 0.9,
   });
-  return content.split('\n')[0].trim().slice(0, 60);
+  return stripReasoning(content.split('\n')[0].trim().slice(0, 60));
 }
 
 export async function generateConclusion(conversation, userName) {
