@@ -24,6 +24,7 @@ export default function App() {
     notas,
     loading,
     gamification,
+    gamificationByConversation,
     gamificationPending,
     sendMessage,
     startNewChat,
@@ -53,6 +54,7 @@ export default function App() {
         onRename={renameConversation}
         open={sidebarOpen}
         onClose={closeSidebar}
+        gamificationByConversation={gamificationByConversation}
       />
 
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">

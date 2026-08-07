@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, MessageSquare, Pencil, Plus, Shield, Sparkles, Trash2, X } from 'lucide-react';
+import { Footprints, LogOut, MessageSquare, Pencil, Plus, Shield, Sparkles, Trash2, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ConfirmModal from './ConfirmModal';
 
@@ -13,6 +13,7 @@ export default function Sidebar({
   onRename,
   open,
   onClose,
+  gamificationByConversation,
 }) {
   const { user, logout, isAdmin, role } = useAuth();
   const navigate = useNavigate();
@@ -104,22 +105,32 @@ export default function Sidebar({
                   </button>
                 )}
                 {editingId !== conversation.id && (
-                  <div className="flex shrink-0 gap-0.5 opacity-0 transition group-hover:opacity-100">
-                    <button
-                      onClick={() => startEdit(conversation)}
-                      title="Renombrar"
-                      className="rounded p-1 hover:bg-white/20"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setDeleteTarget(conversation)}
-                      title="Eliminar"
-                      className="rounded p-1 hover:bg-white/20"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+                  <>
+                    <div className="flex shrink-0 items-center gap-1 rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold text-white/80">
+                      <Sparkles className="h-2.5 w-2.5 text-brand-300" />
+                      {gamificationByConversation?.[conversation.id]?.xp || 0}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1 rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-200">
+                      <Footprints className="h-2.5 w-2.5" />
+                      {gamificationByConversation?.[conversation.id]?.huellas || 0}
+                    </div>
+                    <div className="flex shrink-0 gap-0.5 opacity-0 transition group-hover:opacity-100">
+                      <button
+                        onClick={() => startEdit(conversation)}
+                        title="Renombrar"
+                        className="rounded p-1 hover:bg-white/20"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(conversation)}
+                        title="Eliminar"
+                        className="rounded p-1 hover:bg-white/20"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             ))}

@@ -1,7 +1,9 @@
 import { get, onValue, ref, set, update } from 'firebase/database';
 import { rtdb } from '../firebase';
 
-const gamificationRef = (uid) => ref(rtdb, `gamification/${uid}`);
+const gamificationRootRef = (uid) => ref(rtdb, `gamification/${uid}`);
+const gamificationRef = (uid, conversationId) =>
+  ref(rtdb, `gamification/${uid}/${conversationId}`);
 
 export const XP_PER_MESSAGE = 10;
 export const XP_PAIN_BONUS = 15;
@@ -16,6 +18,19 @@ export const PAIN_KEYWORDS = [
   'lloro', 'pesa', 'agobiad', 'angusti', 'solo', 'sola', 'sin esperanza',
   'migrana', 'cefalea', 'sintiendo mal', 'me siento mal', 'no puedo mas',
 ];
+
+export const DEFAULT_GAMIFICATION = {
+  xp: 0,
+  huellas: 0,
+  messages: 0,
+  conversations: 0,
+  painNotes: 0,
+  trophies: {},
+  lastActiveDay: null,
+  streak: 0,
+  bestStreak: 0,
+  conclusionDone: false,
+};
 
 export function levelFromXp(xp) {
   let level = 1;
@@ -46,26 +61,28 @@ export const TROPHIES = [
 
 export function subscribeGamification(uid, callback) {
   return onValue(
-    gamificationRef(uid),
-    (snapshot) => callback(snapshot.val() || null),
-    () => callback(null)
+    gamificationRootRef(uid),
+    (snapshot) => {
+      const raw = snapshot.val();
+      if (!raw) {
+        callback({});
+        return;
+      }
+      callback(raw);
+    },
+    () => callback({})
   );
 }
 
-export async function getGamification(uid) {
-  const snap = await get(gamificationRef(uid));
+export async function getGamification(uid, conversationId) {
+  const snap = await get(gamificationRef(uid, conversationId));
   return snap.exists() ? snap.val() : null;
 }
 
-export function initGamification(uid) {
+export function initGamification(uid, conversationId) {
   const now = Date.now();
-  return set(gamificationRef(uid), {
-    xp: 0,
-    huellas: 0,
-    messages: 0,
-    conversations: 0,
-    painNotes: 0,
-    trophies: {},
+  return set(gamificationRef(uid, conversationId), {
+    ...DEFAULT_GAMIFICATION,
     lastActiveDay: now,
     streak: 1,
     bestStreak: 1,
@@ -90,20 +107,9 @@ function trophyIdsFromStats(stats, level) {
   return ids;
 }
 
-export async function applyReward(uid, current, payload) {
+export async function applyReward(uid, conversationId, current, payload) {
   const now = Date.now();
-  const base = current || {
-    xp: 0,
-    huellas: 0,
-    messages: 0,
-    conversations: 0,
-    painNotes: 0,
-    trophies: {},
-    streak: 1,
-    bestStreak: 1,
-    lastActiveDay: now,
-    createdAt: now,
-  };
+  const base = current || { ...DEFAULT_GAMIFICATION };
 
   const newXp = (base.xp || 0) + (payload.xp || 0);
   const newHuellas = (base.huellas || 0) + (payload.huellas || 0);
@@ -111,14 +117,14 @@ export async function applyReward(uid, current, payload) {
   const newConversations = (base.conversations || 0) + (payload.conversations || 0);
   const newPainNotes = (base.painNotes || 0) + (payload.painNotes || 0);
 
-  let streak = base.streak || 1;
+  let streak = base.streak || 0;
   const todayKey = new Date(now).toDateString();
   const lastKey = base.lastActiveDay ? new Date(base.lastActiveDay).toDateString() : '';
   if (todayKey !== lastKey) {
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayKey = yesterday.toDateString();
-    streak = lastKey === yesterdayKey ? (base.streak || 1) + 1 : 1;
+    streak = lastKey === yesterdayKey ? (base.streak || 0) + 1 : 1;
   }
 
   const { level } = levelFromXp(newXp);
@@ -146,11 +152,11 @@ export async function applyReward(uid, current, payload) {
     painNotes: newPainNotes,
     trophies,
     streak,
-    bestStreak: Math.max(base.bestStreak || 1, streak),
+    bestStreak: Math.max(base.bestStreak || 0, streak),
     lastActiveDay: now,
     conclusionDone: Boolean(base.conclusionDone) || Boolean(payload.conclusionDone),
   };
 
-  await update(gamificationRef(uid), data).catch(() => {});
+  await update(gamificationRef(uid, conversationId), data).catch(() => {});
   return { data, level };
 }

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Award, Footprints, Sparkles, X } from 'lucide-react';
-import { levelFromXp, TROPHIES } from '../services/gamificationService';
+import { levelFromXp, TROPHIES, DEFAULT_GAMIFICATION } from '../services/gamificationService';
 
 function TrophiesModal({ open, trophies, onClose }) {
   if (!open) return null;
@@ -50,17 +50,15 @@ function TrophiesModal({ open, trophies, onClose }) {
 export default function GamificationBar({ gamification, pending }) {
   const [showTrophies, setShowTrophies] = useState(false);
 
+  const data = { ...DEFAULT_GAMIFICATION, ...(gamification || {}) };
   const progress = useMemo(() => {
-    if (!gamification) return null;
-    const { level, intoLevel, requiredForNext } = levelFromXp(gamification.xp || 0);
+    const { level, intoLevel, requiredForNext } = levelFromXp(data.xp || 0);
     return { level, intoLevel, requiredForNext };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gamification]);
 
-  if (!gamification || !progress) return null;
-
   const pct = Math.min(100, Math.round((progress.intoLevel / progress.requiredForNext) * 100));
-  const huellas = gamification.huellas || 0;
-  const trophiesCount = Object.keys(gamification.trophies || {}).length;
+  const trophiesCount = Object.keys(data.trophies || {}).length;
 
   return (
     <>
@@ -78,7 +76,7 @@ export default function GamificationBar({ gamification, pending }) {
               />
             </div>
             <p className="mt-0.5 text-[10px] text-slate-400">
-              {progress.intoLevel}/{progress.requiredForNext} XP · {gamification.xp || 0} XP totales
+              {progress.intoLevel}/{progress.requiredForNext} XP · {data.xp || 0} XP totales
             </p>
           </div>
           <button
@@ -91,7 +89,7 @@ export default function GamificationBar({ gamification, pending }) {
           </button>
           <div className="flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 ring-1 ring-inset ring-emerald-100">
             <Footprints className="h-3.5 w-3.5 text-emerald-600" />
-            <span className="text-xs font-bold text-emerald-700">{huellas}</span>
+            <span className="text-xs font-bold text-emerald-700">{data.huellas || 0}</span>
           </div>
         </div>
       </div>
@@ -109,7 +107,7 @@ export default function GamificationBar({ gamification, pending }) {
 
       <TrophiesModal
         open={showTrophies}
-        trophies={gamification.trophies}
+        trophies={data.trophies}
         onClose={() => setShowTrophies(false)}
       />
     </>

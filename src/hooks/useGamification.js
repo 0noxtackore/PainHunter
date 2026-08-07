@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   subscribeGamification,
   applyReward,
-  initGamification,
   XP_PER_MESSAGE,
   XP_PAIN_BONUS,
   XP_CONVERSATION_BONUS,
@@ -12,33 +11,27 @@ import {
 } from '../services/gamificationService';
 
 export function useGamification(uid) {
-  const [gamification, setGamification] = useState(null);
+  const [byConversation, setByConversation] = useState({});
   const [pending, setPending] = useState(null);
-  const dataRef = useRef(null);
+  const dataRef = useRef({});
 
   useEffect(() => {
-    if (!uid) {
-      setGamification(null);
-      return undefined;
-    }
-    return subscribeGamification(uid, (data) => {
-      dataRef.current = data;
-      setGamification(data);
+    dataRef.current = {};
+    setByConversation({});
+    if (!uid) return undefined;
+    return subscribeGamification(uid, (map) => {
+      dataRef.current = map || {};
+      setByConversation(map || {});
     });
   }, [uid]);
 
-  useEffect(() => {
-    if (uid && !gamification) {
-      initGamification(uid);
-    }
-  }, [uid, gamification]);
-
   const reward = useCallback(
-    async (payload) => {
-      if (!uid) return null;
-      const result = await applyReward(uid, dataRef.current, payload);
-      dataRef.current = result.data;
-      setGamification(result.data);
+    async (conversationId, payload) => {
+      if (!uid || !conversationId) return null;
+      const current = dataRef.current[conversationId] || null;
+      const result = await applyReward(uid, conversationId, current, payload);
+      dataRef.current = { ...dataRef.current, [conversationId]: result.data };
+      setByConversation(dataRef.current);
       setPending(payload);
       setTimeout(() => setPending(null), 2500);
       return result;
@@ -47,7 +40,7 @@ export function useGamification(uid) {
   );
 
   const rewardMessage = useCallback(
-    async (content, options = {}) => {
+    async (conversationId, content, options = {}) => {
       const text = String(content || '');
       const isPain = options.pain || PAIN_KEYWORDS.some((word) => text.toLowerCase().includes(word));
       const payload = {
@@ -56,14 +49,14 @@ export function useGamification(uid) {
         messages: 1,
         ...(options.notes ? { painNotes: options.notes } : {}),
       };
-      return reward(payload);
+      return reward(conversationId, payload);
     },
     [reward]
   );
 
   const rewardConversation = useCallback(
-    async (options = {}) => {
-      return reward({
+    async (conversationId, options = {}) => {
+      return reward(conversationId, {
         xp: XP_CONVERSATION_BONUS,
         conversations: 1,
         painNotes: options.notes || 0,
@@ -74,7 +67,8 @@ export function useGamification(uid) {
   );
 
   return {
-    gamification,
+    byConversation,
+    gamification: byConversation,
     pending,
     rewardMessage,
     rewardConversation,
