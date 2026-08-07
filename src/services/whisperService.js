@@ -1,6 +1,6 @@
 import { pipeline } from '@huggingface/transformers';
 
-const MODEL_ID = 'onnx-community/whisper-base';
+const MODEL_ID = 'Xenova/whisper-base';
 const TARGET_RATE = 16000;
 let transcriberPromise = null;
 let loadProgress = null;
