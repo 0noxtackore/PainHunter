@@ -79,6 +79,65 @@ export async function getGamification(uid, conversationId) {
   return snap.exists() ? snap.val() : null;
 }
 
+export function computeGamification(conversation) {
+  const msgs = Array.isArray(conversation?.messages)
+    ? conversation.messages.filter((m) => m.role === 'user')
+    : [];
+  if (msgs.length === 0) return null;
+
+  const painNotes = Array.isArray(conversation?.notas) ? conversation.notas.length : 0;
+  let xp = 0;
+  let huellas = 0;
+  for (const msg of msgs) {
+    const text = String(msg.content || '').toLowerCase();
+    const isPain = PAIN_KEYWORDS.some((word) => text.includes(word));
+    xp += XP_PER_MESSAGE + (isPain ? XP_PAIN_BONUS : 0);
+    huellas += HUELLAS_PER_MESSAGE + (isPain ? HUELLAS_PAIN_BONUS : 0);
+  }
+
+  const conversations = conversation?.conclusion ? 1 : 0;
+  if (conversations) xp += XP_CONVERSATION_BONUS;
+  const conclusionDone = Boolean(conversation?.conclusion);
+  const now = Date.now();
+
+  const stats = {
+    messages: msgs.length,
+    conversations,
+    painNotes,
+    streak: conversations ? 1 : 0,
+    conclusionDone,
+  };
+  const { level } = levelFromXp(xp);
+  const unlocked = trophyIdsFromStats(stats, level);
+  const trophies = {};
+  for (const id of unlocked) trophies[id] = now;
+
+  return {
+    xp,
+    huellas,
+    messages: msgs.length,
+    conversations,
+    painNotes,
+    trophies,
+    streak: stats.streak,
+    bestStreak: stats.streak,
+    lastActiveDay: now,
+    createdAt: conversation?.createdAt || now,
+    conclusionDone,
+  };
+}
+
+export async function saveGamification(uid, conversationId, data) {
+  return set(gamificationRef(uid, conversationId), data).catch(() => {});
+}
+
+export async function backfillConversation(uid, conversationId, conversation) {
+  const data = computeGamification(conversation);
+  if (!data) return null;
+  await saveGamification(uid, conversationId, data);
+  return data;
+}
+
 export function initGamification(uid, conversationId) {
   const now = Date.now();
   return set(gamificationRef(uid, conversationId), {

@@ -36,6 +36,8 @@ export function useChat() {
     byConversation,
     gamification,
     pending,
+    ready: gamificationReady,
+    backfillConversations,
     rewardMessage,
     rewardConversation,
   } = useGamification(uid);
@@ -65,6 +67,17 @@ export function useChat() {
       if (list) setConversations(list);
     });
   }, [uid]);
+
+  const backfillTimerRef = useRef(null);
+  useEffect(() => {
+    if (backfillTimerRef.current) clearTimeout(backfillTimerRef.current);
+    backfillTimerRef.current = setTimeout(() => {
+      backfillConversations(conversations).catch(() => {});
+    }, 800);
+    return () => {
+      if (backfillTimerRef.current) clearTimeout(backfillTimerRef.current);
+    };
+  }, [conversations, backfillConversations, gamificationReady]);
 
   const save = useCallback(
     (conversation) => {

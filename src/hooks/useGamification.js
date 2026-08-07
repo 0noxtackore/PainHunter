@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   subscribeGamification,
   applyReward,
+  backfillConversation,
   XP_PER_MESSAGE,
   XP_PAIN_BONUS,
   XP_CONVERSATION_BONUS,
@@ -12,16 +13,22 @@ import {
 
 export function useGamification(uid) {
   const [byConversation, setByConversation] = useState({});
+  const [ready, setReady] = useState(false);
   const [pending, setPending] = useState(null);
   const dataRef = useRef({});
+  const readyRef = useRef(false);
 
   useEffect(() => {
     dataRef.current = {};
     setByConversation({});
+    setReady(false);
+    readyRef.current = false;
     if (!uid) return undefined;
     return subscribeGamification(uid, (map) => {
       dataRef.current = map || {};
       setByConversation(map || {});
+      setReady(true);
+      readyRef.current = true;
     });
   }, [uid]);
 
@@ -35,6 +42,24 @@ export function useGamification(uid) {
       setPending(payload);
       setTimeout(() => setPending(null), 2500);
       return result;
+    },
+    [uid]
+  );
+
+  const backfillConversations = useCallback(
+    async (conversations) => {
+      if (!uid || !readyRef.current || !Array.isArray(conversations)) return;
+      let changed = false;
+      for (const conversation of conversations) {
+        if (!conversation || !conversation.id) continue;
+        if (dataRef.current[conversation.id]) continue;
+        const data = await backfillConversation(uid, conversation.id, conversation);
+        if (data) {
+          dataRef.current = { ...dataRef.current, [conversation.id]: data };
+          changed = true;
+        }
+      }
+      if (changed) setByConversation(dataRef.current);
     },
     [uid]
   );
@@ -69,7 +94,9 @@ export function useGamification(uid) {
   return {
     byConversation,
     gamification: byConversation,
+    ready,
     pending,
+    backfillConversations,
     rewardMessage,
     rewardConversation,
   };
