@@ -4,7 +4,6 @@ const MODEL = import.meta.env.VITE_OPENROUTER_MODEL || 'google/gemma-4-31b-it:fr
 const FALLBACK_MODELS = [
   'google/gemma-4-31b-it:free',
   'google/gemma-4-26b-a4b-it:free',
-  'inclusionai/ling-3.0-tiny:free',
 ].filter((model) => model !== MODEL);
 
 const SYSTEM_PROMPT = [

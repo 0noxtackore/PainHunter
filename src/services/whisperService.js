@@ -8,6 +8,10 @@ export function getWhisperLoadProgress() {
   return loadProgress;
 }
 
+export function isWhisperLoaded() {
+  return transcriberPromise !== null;
+}
+
 export function loadWhisper() {
   if (transcriberPromise) return transcriberPromise;
   loadProgress = { loaded: 0, total: 0, label: '' };
@@ -21,10 +25,6 @@ export function loadWhisper() {
     throw error;
   });
   return transcriberPromise;
-}
-
-export function isWhisperLoaded() {
-  return transcriberPromise !== null;
 }
 
 export async function transcribeWithWhisper(audioData, language = 'es') {

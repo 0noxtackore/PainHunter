@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu } from 'lucide-react';
 import { useChat } from './hooks/useChat';
 import { usePageTitle } from './hooks/usePageTitle';
+import { loadWhisper } from './services/whisperService';
 import Sidebar from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
 import Messages from './components/Messages';
@@ -10,6 +11,11 @@ import WelcomeScreen from './components/WelcomeScreen';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    loadWhisper().catch(() => {});
+  }, []);
+
   const {
     conversations,
     activeConversationId,

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Loader2, Mic, Send, Square } from 'lucide-react';
 import { transcribeAudio } from '../services/chatService';
-import { getWhisperLoadProgress } from '../services/whisperService';
+import { getWhisperLoadProgress, isWhisperLoaded } from '../services/whisperService';
 import VoiceEqualizer from './VoiceEqualizer';
 
 export default function ChatInput({ onSend, disabled }) {
@@ -93,7 +93,9 @@ export default function ChatInput({ onSend, disabled }) {
       if (blob.size === 0) return;
 
       setTranscribing(true);
-      setDownloadProgress({ loaded: 0, total: 0, label: 'Preparando Whisper…' });
+      if (!isWhisperLoaded()) {
+        setDownloadProgress({ loaded: 0, total: 0, label: 'Preparando Whisper…' });
+      }
       try {
         const text = await transcribeAudio(blob);
         setValue((prev) => (prev ? `${prev} ${text}` : text));
