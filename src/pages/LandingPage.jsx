@@ -7,7 +7,6 @@ import {
   Check,
   ChevronDown,
   HeartPulse,
-  Lock,
   Menu,
   MessageCircle,
   Quote,
@@ -162,13 +161,6 @@ export default function LandingPage() {
 
           <div className="hidden items-center gap-2 lg:flex">
             <Link
-              to="/superusers"
-              className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-            >
-              <Lock className="h-4 w-4" />
-              Superusuarios
-            </Link>
-            <Link
               to="/login"
               className="inline-flex items-center justify-center rounded-xl border border-brand-200 bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50"
             >
@@ -222,13 +214,6 @@ export default function LandingPage() {
                 >
                   <UserPlus className="h-4 w-4" />
                   Registrarme
-                </Link>
-                <Link
-                  to="/superusers"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700"
-                >
-                  <Lock className="h-4 w-4" />
-                  Acceso de superusuarios
                 </Link>
               </div>
             </div>
@@ -606,12 +591,6 @@ export default function LandingPage() {
                 <li>
                   <Link to="/register" className="text-slate-500 transition hover:text-brand-600">
                     Crear cuenta
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/superusers" className="inline-flex items-center gap-1.5 text-slate-500 transition hover:text-brand-600">
-                    <Lock className="h-3.5 w-3.5" />
-                    Acceso de superusuarios
                   </Link>
                 </li>
               </ul>

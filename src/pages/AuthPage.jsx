@@ -8,7 +8,6 @@ import {
   Lock,
   Mail,
   MessageCircle,
-  Shield,
   ShieldCheck,
   Sparkles,
   User,
@@ -289,15 +288,6 @@ export default function AuthPage({ mode }) {
                   {isRegister ? 'Inicia sesión' : 'Regístrate gratis'}
                 </button>
               </p>
-              {!isRegister && (
-                <button
-                  onClick={() => navigate('/superusers')}
-                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-medium text-slate-500 transition hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-700"
-                >
-                  <Shield className="h-3.5 w-3.5" />
-                  Acceso de superusuarios
-                </button>
-              )}
             </div>
           </div>
         </div>
