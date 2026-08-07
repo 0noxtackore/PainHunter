@@ -278,10 +278,11 @@ export async function generateTitle(conversation) {
     .join(' ')
     .slice(0, 800);
   const prompt =
-    'Eres un asistente que pone titulos cortos y claros a conversaciones de apoyo emocional ' +
-    'y laboral. Basandote en lo que el usuario cuenta, genera un titulo de MAXIMO 5 palabras ' +
-    'en espanol, en minusculas y sin puntuacion. Solo responde con el titulo, nada mas.\n\n' +
-    `Lo que el usuario ha contado: "${userTexts}"\n\nTitulo:`;
+    'Eres un asistente que pone titulos cortos a conversaciones de apoyo emocional y laboral. ' +
+    'El idioma SIEMPRE es español: esta es la regla mas importante, aunque el usuario escriba en otro idioma ' +
+    'el titulo debe estar en español. Basandote en lo que el usuario cuenta, genera un titulo de MAXIMO 5 ' +
+    'palabras en español, en minusculas y sin puntuacion. Solo responde con el titulo en español, nada mas.\n\n' +
+    `Lo que el usuario ha contado: "${userTexts}"\n\nTitulo en español:`;
   const content = await fetchCompletion([{ role: 'user', content: prompt }], {
     temperature: 0.3,
     maxTokens: 20,
