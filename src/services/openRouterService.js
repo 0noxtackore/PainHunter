@@ -243,9 +243,12 @@ export async function streamReply(conversation, onToken, onNotes, userName) {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
+      const MARKER = '###NOTAS###';
+      const MARKER_LEN = MARKER.length;
       let buffer = '';
       let content = '';
       let receivedAny = false;
+      let emittedLength = 0;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -268,12 +271,25 @@ export async function streamReply(conversation, onToken, onNotes, userName) {
             if (delta) {
               receivedAny = true;
               content += delta;
-              onToken(delta);
+              const markerIndex = content.indexOf(MARKER);
+              const visibleEnd =
+                markerIndex !== -1
+                  ? markerIndex
+                  : Math.max(0, content.length - (MARKER_LEN - 1));
+              if (visibleEnd > emittedLength) {
+                onToken(content.slice(emittedLength, visibleEnd));
+                emittedLength = visibleEnd;
+              }
             }
           } catch {
             /* evento ignorado */
           }
         }
+      }
+
+      if (!content.includes(MARKER) && emittedLength < content.length) {
+        onToken(content.slice(emittedLength));
+        emittedLength = content.length;
       }
 
       if (content.trim()) {
