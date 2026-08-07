@@ -47,8 +47,8 @@ const FEATURES = [
   },
   {
     icon: HeartPulse,
-    title: 'Notas de mejora automáticas',
-    text: 'Cada obstáculo queda documentado con fecha, clasificación y evolución para el seguimiento del clima.',
+    title: 'Gana puntos con cada conversación',
+    text: 'Cada entrevista con Mr Hunter te suma puntos y reconocimientos por tu participación y tus aportes.',
   },
 ];
 
@@ -68,8 +68,8 @@ const STEPS = [
   {
     n: '03',
     icon: Sparkles,
-    title: 'Revisa tus notas',
-    text: 'Tus observaciones quedan registradas con una conclusión y una recomendación personalizada.',
+    title: 'Suma puntos y sigue avanzando',
+    text: 'Con cada conversación ganas puntos y reconocimientos mientras avanzas hacia un mejor día a día laboral.',
   },
 ];
 
@@ -105,8 +105,8 @@ const FAQS = [
     a: 'Crear tu cuenta y conversar con Mr Hunter es completamente gratis. Mejorar el clima laboral no debería tener barreras.',
   },
   {
-    q: '¿Cómo se registran mis observaciones?',
-    a: 'Mr Hunter analiza cada conversación y detecta automáticamente los obstáculos que mencionas (herramientas, procesos, comunicación, carga de trabajo) y crea una nota de mejora para tu seguimiento.',
+    q: '¿Cómo gano puntos?',
+    a: 'Cada conversación con Mr Hunter te suma puntos por participar y por compartir tus experiencias laborales. Acumulas recompensas que reconocen tu constancia y tus aportes al mejorar el clima del equipo.',
   },
 ];
 
