@@ -31,13 +31,13 @@ function Field({ label, children }) {
 const BRAND_FEATURES = [
   {
     icon: HeartPulse,
-    title: 'Atención de dolor',
-    text: 'Detectamos tus molestias y las registramos para tu seguimiento.',
+    title: 'Detecta obstáculos',
+    text: 'Registramos lo que te frena en el trabajo para tu seguimiento.',
   },
   {
     icon: MessageCircle,
     title: 'Conversa con Mr Hunter',
-    text: 'Un entrevistador empático que te escucha sin juicios.',
+    text: 'Un entrevistador de clima laboral que te escucha sin juicios.',
   },
   {
     icon: ShieldCheck,
@@ -124,13 +124,13 @@ export default function AuthPage({ mode }) {
             </div>
             <h2 className="mt-10 text-2xl font-bold leading-snug text-white">
               {isRegister
-                ? 'Empieza tu camino hacia el bienestar'
+                ? 'Empieza tu entrevista laboral'
                 : 'Bienvenido de nuevo'}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-white/70">
               {isRegister
-                ? 'Crea tu cuenta y conversa con Mr Hunter, tu entrevistador personal para entender y cuidar tu salud emocional y laboral.'
-                : 'Continúa tu conversación con Mr Hunter y sigue tu seguimiento de dolor.'}
+                ? 'Crea tu cuenta y conversa con Mr Hunter, tu entrevistador de clima laboral para conocer y mejorar tu día a día en el trabajo.'
+                : 'Continúa tu conversación con Mr Hunter y sigue tu registro de obstáculos.'}
             </p>
           </div>
 
@@ -150,7 +150,7 @@ export default function AuthPage({ mode }) {
 
           <div className="relative flex items-center gap-2 text-xs text-white/50">
             <Sparkles className="h-3.5 w-3.5" />
-            PainHunter · Cuidado emocional con IA
+            PainHunter · Clima laboral con IA
           </div>
         </aside>
 

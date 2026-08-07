@@ -11,6 +11,12 @@
     @apply bg-slate-50 text-slate-900;
   }
 
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;

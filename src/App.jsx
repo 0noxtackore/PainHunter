@@ -60,7 +60,7 @@ export default function App() {
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="h-1 shrink-0 bg-gradient-to-r from-brand-400 via-brand-500 to-brand-700" />
         <div className="relative flex h-20 shrink-0 items-center justify-center border-b border-white/10 bg-gradient-to-r from-brand-700 to-brand-900 px-4 md:hidden">
-          <img src="/img/logo_menubar.png" alt="PainHunter" className="mx-auto h-8 w-auto object-contain" />
+          <img src="/img/logo_sidebar.png" alt="PainHunter" className="mx-auto h-8 w-auto object-contain" />
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Abrir menú"

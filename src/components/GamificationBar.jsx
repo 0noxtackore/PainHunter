@@ -95,13 +95,48 @@ export default function GamificationBar({ gamification, pending }) {
       </div>
 
       {pending && (
-        <div className="pointer-events-none fixed right-6 top-24 z-[100] animate-slideIn rounded-xl border border-brand-200 bg-white px-4 py-3 shadow-xl">
-          <p className="text-xs font-semibold text-brand-700">
-            +{pending.xp || 0} XP {pending.xp > 10 ? '✨' : ''}
-          </p>
-          <p className="mt-0.5 text-[10px] text-slate-500">
-            +{pending.huellas || 0} huellas {pending.painNotes ? '· nota de dolor registrada' : ''}
-          </p>
+        <div className="pointer-events-none fixed inset-x-0 top-20 z-[100] flex justify-center px-4 sm:justify-end sm:px-6">
+          <div className="flex animate-popIn items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-2xl sm:mt-2">
+            {pending.newTrophies?.length > 0 ? (
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-xl shadow-md">
+                🏆
+              </span>
+            ) : pending.conversations ? (
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-700 text-xl shadow-md">
+                🏅
+              </span>
+            ) : pending.xp > 10 ? (
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-rose-600 text-xl shadow-md">
+                ❤️
+              </span>
+            ) : (
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-700 text-xl shadow-md">
+                ✨
+              </span>
+            )}
+            <div>
+              {pending.newTrophies?.length > 0 ? (
+                <>
+                  <p className="text-xs font-bold text-amber-600">¡Trofeo desbloqueado!</p>
+                  {pending.newTrophies.map((id) => {
+                    const trophy = TROPHIES.find((t) => t.id === id);
+                    return (
+                      <p key={id} className="text-sm font-semibold text-slate-800">
+                        {trophy ? `${trophy.icon} ${trophy.name}` : id}
+                      </p>
+                    );
+                  })}
+                </>
+              ) : (
+                <p className="text-sm font-bold text-slate-800">
+                  +{pending.xp || 0} XP {pending.xp > 10 ? '· reconocimiento' : ''}
+                </p>
+              )}
+              <p className="text-[11px] text-slate-500">
+                +{pending.huellas || 0} huellas {pending.painNotes ? '· observación registrada' : ''}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

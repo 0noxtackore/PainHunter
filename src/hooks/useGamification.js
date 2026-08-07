@@ -39,8 +39,14 @@ export function useGamification(uid) {
       const result = await applyReward(uid, conversationId, current, payload);
       dataRef.current = { ...dataRef.current, [conversationId]: result.data };
       setByConversation(dataRef.current);
-      setPending(payload);
-      setTimeout(() => setPending(null), 2500);
+
+      const newTrophies = [];
+      for (const [id, ts] of Object.entries(result.data.trophies || {})) {
+        if (!current?.trophies?.[id]) newTrophies.push(id);
+      }
+
+      setPending({ ...payload, newTrophies });
+      setTimeout(() => setPending(null), 3500);
       return result;
     },
     [uid]

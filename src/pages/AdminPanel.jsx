@@ -102,8 +102,8 @@ export default function AdminPanel() {
   const stats = [
     { label: 'Usuarios', value: users.length, icon: Users, accent: 'from-brand-500 to-brand-700', text: 'text-brand-600' },
     { label: 'Conversaciones', value: totalChats, icon: MessageSquare, accent: 'from-sky-500 to-sky-700', text: 'text-sky-600' },
-    { label: 'Notas de dolor', value: totalNotas, icon: NotebookPen, accent: 'from-red-500 to-red-700', text: 'text-red-600' },
-    { label: 'Usuarios con dolor', value: usuariosConDolor, icon: Activity, accent: 'from-amber-500 to-amber-700', text: 'text-amber-600' },
+    { label: 'Obstáculos', value: totalNotas, icon: NotebookPen, accent: 'from-red-500 to-red-700', text: 'text-red-600' },
+    { label: 'Usuarios con observaciones', value: usuariosConDolor, icon: Activity, accent: 'from-amber-500 to-amber-700', text: 'text-amber-600' },
   ];
 
   return (
@@ -250,7 +250,7 @@ export default function AdminPanel() {
                             (s, c) => s + (c.notas?.length || 0) + (c.esDolor ? 1 : 0),
                             0
                           )}{' '}
-                          dolor
+                          obstáculo{chats.reduce((s, c) => s + (c.notas?.length || 0) + (c.esDolor ? 1 : 0), 0) === 1 ? '' : 's'}
                         </span>
                       )}
                       <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
@@ -294,7 +294,7 @@ export default function AdminPanel() {
                                       </span>
                                       {chat.esDolor && (
                                         <span className="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600 ring-1 ring-inset ring-red-200">
-                                          dolor
+                                          obstáculo
                                         </span>
                                       )}
                                       {!chat.esDolor && notas.length > 0 && (
@@ -341,7 +341,7 @@ export default function AdminPanel() {
                                     <div>
                                       <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-600">
                                         <NotebookPen className="h-3.5 w-3.5" />
-                                        Notas de dolor detectadas
+                                        Observaciones detectadas
                                       </p>
                                       <ul className="space-y-1.5">
                                         {notas.map((nota, index) => (
@@ -369,11 +369,11 @@ export default function AdminPanel() {
                                           </p>
                                           {chat.esDolor ? (
                                             <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600 ring-1 ring-inset ring-red-200">
-                                              Nota de dolor
+                                              Hay obstáculo
                                             </span>
                                           ) : (
                                             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-600 ring-1 ring-inset ring-emerald-200">
-                                              Sin dolor
+                                              Sin obstáculo
                                             </span>
                                           )}
                                         </div>

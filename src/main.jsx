@@ -14,7 +14,7 @@ import './index.css';
 function LoadingScreen() {
   return (
     <div className="flex h-screen items-center justify-center bg-slate-50">
-      <img src="/img/logo_menubar.png" alt="PainHunter" className="h-10 w-auto animate-pulse" />
+      <img src="/img/logo_sidebar.png" alt="PainHunter" className="h-10 w-auto animate-pulse" />
     </div>
   );
 }

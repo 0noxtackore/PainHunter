@@ -24,12 +24,12 @@ const FEATURES = [
   {
     icon: MessageCircle,
     title: 'Conversa con Mr Hunter',
-    text: 'Un entrevistador empático que te escucha sin juicios, detecta tus molestias y las registra para tu seguimiento.',
+    text: 'Un entrevistador de clima laboral que te pregunta por tu día a día, detecta los obstáculos y los registra para el diagnóstico del equipo.',
   },
   {
     icon: Activity,
-    title: 'Atención de dolor',
-    text: 'Identifica y clasifica automáticamente señales de dolor, cansancio, estrés o insomnio en cada conversación.',
+    title: 'Detecta el dolor del equipo',
+    text: 'Identifica automáticamente cuellos de botella, fricciones y procesos pesados en cada conversación.',
   },
   {
     icon: Brain,
@@ -38,8 +38,8 @@ const FEATURES = [
   },
   {
     icon: Sparkles,
-    title: 'Recomendaciones inteligentes',
-    text: 'Recibe conclusiones y soluciones personalizadas al final de cada sesión de conversación.',
+    title: 'Recomendaciones accionables',
+    text: 'Recibe conclusiones y sugerencias concretas para mejorar tu trabajo al final de cada entrevista.',
   },
   {
     icon: ShieldCheck,
@@ -48,8 +48,8 @@ const FEATURES = [
   },
   {
     icon: HeartPulse,
-    title: 'Notas de dolor automáticas',
-    text: 'Cada malestar queda documentado con fecha, clasificación y evolución para tu bienestar.',
+    title: 'Notas de mejora automáticas',
+    text: 'Cada obstáculo queda documentado con fecha, clasificación y evolución para el seguimiento del clima.',
   },
 ];
 
@@ -64,38 +64,38 @@ const STEPS = [
     n: '02',
     icon: MessageCircle,
     title: 'Conversa con Mr Hunter',
-    text: 'Cuéntale cómo te sientes. Él te hará preguntas para entenderte y detectar señales de dolor.',
+    text: 'Cuéntale cómo es tu día a día laboral. Él te hará preguntas para entender tus obstáculos y oportunidades de mejora.',
   },
   {
     n: '03',
     icon: Sparkles,
-    title: 'Revisa tus notas de dolor',
-    text: 'Tus molestias quedan registradas con una conclusión y una recomendación personalizada.',
+    title: 'Revisa tus notas',
+    text: 'Tus observaciones quedan registradas con una conclusión y una recomendación personalizada.',
   },
 ];
 
 const TESTIMONIALS = [
   {
     name: 'Ana M.',
-    role: 'Usuaria desde hace 3 meses',
-    text: 'Me sorprende cómo Mr Hunter detecta mis dolores de cabeza sin que yo los mencione directamente. Se siente como una conversación real.',
+    role: 'Empleada del área de operaciones',
+    text: 'Me sorprende cómo Mr Hunter detecta los cuellos de botella de mi equipo sin que yo los detalle mucho. Se siente como una conversación real.',
   },
   {
     name: 'Carlos R.',
-    role: 'Usuaria desde hace 2 meses',
-    text: 'Finalmente alguien que me escucha. Las recomendaciones al final de cada conversación me han ayudado mucho a cuidarme mejor.',
+    role: 'Empleado del área de ventas',
+    text: 'Finalmente alguien que escucha mis problemas de herramientas. Las recomendaciones al final de cada entrevista me han ayudado a trabajar mejor.',
   },
   {
     name: 'Lucía G.',
-    role: 'Usuaria desde hace 1 mes',
-    text: 'Valoro muchísimo la privacidad. Saber que mi información no sale de mi dispositivo me da total confianza.',
+    role: 'Empleada del área de TI',
+    text: 'Valoro muchísimo la privacidad. Saber que mi información no sale de mi dispositivo me da total confianza para hablar con franqueza.',
   },
 ];
 
 const FAQS = [
   {
     q: '¿Qué es Mr Hunter?',
-    a: 'Mr Hunter es tu asistente de bienestar. Un entrevistador con IA que conversa contigo de forma empática, detecta señales de dolor y malestar, y te entrega conclusiones y recomendaciones al final de cada conversación.',
+    a: 'Mr Hunter es tu entrevistador de clima laboral. Una IA que conversa contigo sobre tu día a día en el trabajo, detecta obstáculos, procesos pesados y fricciones, y te entrega conclusiones y recomendaciones al final de cada entrevista.',
   },
   {
     q: '¿Mis datos son privados?',
@@ -103,11 +103,11 @@ const FAQS = [
   },
   {
     q: '¿Cuánto cuesta?',
-    a: 'Crear tu cuenta y conversar con Mr Hunter es completamente gratis. Tu bienestar no debería tener barreras.',
+    a: 'Crear tu cuenta y conversar con Mr Hunter es completamente gratis. Mejorar el clima laboral no debería tener barreras.',
   },
   {
-    q: '¿Cómo se registran las notas de dolor?',
-    a: 'Mr Hunter analiza cada conversación y detecta automáticamente palabras y señales relacionadas con dolor, cansancio, estrés, insomnio y otros malestares, creando una nota de dolor para tu seguimiento.',
+    q: '¿Cómo se registran mis observaciones?',
+    a: 'Mr Hunter analiza cada conversación y detecta automáticamente los obstáculos que mencionas (herramientas, procesos, comunicación, carga de trabajo) y crea una nota de mejora para tu seguimiento.',
   },
 ];
 
@@ -246,19 +246,19 @@ export default function LandingPage() {
           <div className="reveal">
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-700">
               <HeartPulse className="h-3.5 w-3.5" />
-              Tu asistente de bienestar
+              Tu entrevistador de clima laboral
             </span>
             <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
               Mr Hunter, tu{' '}
               <span className="bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent">
-                asistente de dolor
+                cazador de dolores
               </span>{' '}
-              y bienestar
+              del equipo
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600 lg:text-lg">
-              Una plataforma de entrevista psicológica y emocional que te escucha sin juicios,
-              detecta señales de dolor y malestar, y te entrega conclusiones y recomendaciones
-              personalizadas al final de cada conversación.
+              Una plataforma de entrevista laboral que conversa contigo sobre tu día a día en el
+              trabajo, detecta los obstáculos que te frenan y te entrega conclusiones y
+              recomendaciones para mejorar al final de cada conversación.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
@@ -315,13 +315,13 @@ export default function LandingPage() {
               </div>
               <div className="space-y-3 px-5 py-6">
                 <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-2.5 text-sm text-slate-700">
-                  Hola, soy Mr Hunter. ¿Cómo te has sentido estos días?
+                  Hola, soy Mr Hunter. ¿Qué es lo que más te frena en tu trabajo esta semana?
                 </div>
                 <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-md bg-gradient-to-br from-brand-700 to-brand-500 px-4 py-2.5 text-sm text-white shadow-md shadow-brand-700/20">
-                  Últimamente me siento muy cansado y con dolores de cabeza.
+                  Me faltan licencias de un software y las aprobaciones tardan días.
                 </div>
                 <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-2.5 text-sm text-slate-700">
-                  Entiendo. Voy a registrar esto como una nota de dolor…
+                  Entiendo. Voy a registrar este obstáculo…
                 </div>
                 <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3">
                   <span className="typing-dot h-2 w-2 rounded-full bg-brand-500" />
@@ -337,7 +337,7 @@ export default function LandingPage() {
                   <HeartPulse className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-800">Nota de dolor creada</p>
+                  <p className="text-xs font-bold text-slate-800">Obstáculo registrado</p>
                   <p className="text-[10px] text-slate-500">Hace un momento</p>
                 </div>
               </div>
@@ -361,11 +361,11 @@ export default function LandingPage() {
               Beneficios
             </span>
             <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Todo lo que necesitas para tu bienestar
+              Todo lo que necesitas para un mejor clima laboral
             </h2>
             <p className="mt-3 text-slate-600">
-              PainHunter combina una IA local y privada con registro automático de síntomas para
-              cuidarte cada día.
+              PainHunter combina una IA local y privada con registro automático de obstáculos para
+              mejorar cada día tu forma de trabajar.
             </p>
           </div>
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -433,7 +433,7 @@ export default function LandingPage() {
               Lo que dicen nuestros usuarios
             </h2>
             <p className="mt-3 text-slate-600">
-              Personas que ya cuidan su bienestar con la ayuda de Mr Hunter.
+              Empleados que ya mejoran su trabajo con la ayuda de Mr Hunter.
             </p>
           </div>
           <div className="mt-14 grid gap-6 md:grid-cols-3">
@@ -523,7 +523,7 @@ export default function LandingPage() {
           <div className="relative">
             <img src="/img/logo_sidebar.png" alt="PainHunter" className="mx-auto h-16 w-auto drop-shadow" />
             <h2 className="mt-6 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Empieza a cuidar tu bienestar hoy
+              Empieza a mejorar tu trabajo hoy
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-white/85">
               Regístrate gratis y comienza a conversar con Mr Hunter. Tu privacidad está protegida
@@ -571,8 +571,8 @@ export default function LandingPage() {
                 <img src="/img/logo.png" alt="PainHunter" className="h-10 w-auto" />
               </div>
               <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-500">
-                PainHunter · Mr Hunter, tu asistente de bienestar. Conversa, detecta y cuida tu
-                salud emocional con la ayuda de una IA local y privada.
+                PainHunter · Mr Hunter, tu entrevistador de clima laboral. Conversa, detecta los
+                obstáculos del equipo y mejora el trabajo con una IA local y privada.
               </p>
             </div>
             <div>
@@ -624,7 +624,7 @@ export default function LandingPage() {
             <p className="flex items-center gap-1.5 text-xs text-slate-400">
               Hecho con
               <HeartPulse className="h-3.5 w-3.5 text-brand-500" />
-              para tu bienestar
+              para tu trabajo
             </p>
           </div>
         </div>

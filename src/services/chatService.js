@@ -16,42 +16,42 @@ function buildReply(conversation, userName) {
   const greet = (body) => (name ? `${name}, ${body}` : body);
 
   if (/(hola|buenas|buenos días|buenas tardes|buenas noches)/.test(text)) {
-    return greet('hola, gracias por estar aquí. Quiero que te sientas en confianza: este espacio es seguro y confidencial. Cuéntame, ¿cómo te has sentido últimamente: hay dolor, cansancio o algo en el trabajo que te esté pesando?');
+    return greet('hola, gracias por tu tiempo. Esto es una entrevista breve y confidencial sobre tu día a día en el trabajo. Para empezar: ¿qué es lo que más te costó o te frenó esta semana en tus tareas?');
   }
 
   if (/(muchos problemas|tengo problemas|estoy mal|no sé qué hacer|no se que hacer)/.test(text)) {
-    return greet('te escucho y quiero ayudarte. Cuando dices que tienes muchos problemas, me imagino que te sientes abrumado. Respira un momento y dime: ¿cuál es el problema que más te pesa ahora mismo? De ese empezamos. Así no cargamos todo de golpe.');
+    return greet('te escucho y quiero ayudarte a despejar eso. Parece que hay varios frentes abiertos. Dime cuál es el obstáculo que más te está frenando ahora mismo en tu trabajo y de ese empezamos, para no cargar todo de golpe.');
   }
 
   if (/(cansancio|agot|fatiga|cansa|agobiad)/.test(text)) {
-    return greet('el cansancio que describes es real y tiene un origen. Quiero entenderlo mejor: ¿qué parte del día te agota más, y qué hace que ese agotamiento no mejore con el descanso?');
+    return greet('entendido. Ese agotamiento suele tener una causa concreta en el día a día. Cuéntame: ¿qué tarea o momento de la jornada te agota más, y qué crees que lo causa?');
   }
 
   if (/(trabajo|empleo|jefe|oficina|comput|pc|ordenador)/.test(text)) {
-    return greet('gracias por compartirlo. Ese ritmo con tantas tareas desgasta física y mentalmente. Dime: ¿qué es lo que más te pesa de tu jornada hoy: la carga, el ambiente, la relación con tu jefe o la falta de descanso?');
+    return greet('gracias por compartirlo. Quiero entender mejor cómo se trabaja por ahí: ¿qué es lo que más te frena o te complica hoy: las herramientas, los procesos, la carga o la comunicación con tu jefe o el equipo?');
   }
 
   if (/(perdi|pérdida|perdida|perder|duelo)/.test(text)) {
-    return greet('lamento que estés pasando por eso. Las pérdidas duelen y es válido sentirlo. Si te sientes con fuerzas, cuéntame: ¿qué perdiste y cómo te ha afectado en tu día a día?');
+    return greet('gracias por contármelo, y lamento que estés pasando por eso. En el contexto del trabajo: ¿de qué manera esta situación te está afectando tu concentración o tu desempeño estos días?');
   }
 
   if (/(conflicto|enemistad|discu|pelea|relación|relacion)/.test(text)) {
-    return greet('los conflictos con otras personas son de las cosas que más desgastan. ¿Con quién tienes ese conflicto y qué es lo que más te molesta o te duele de esa situación?');
+    return greet('las fricciones entre compañeros o áreas afectan mucho el flujo del trabajo. Cuéntame: ¿con quién o qué área se genera ese conflicto y en qué parte del proceso aparecen los roces?');
   }
 
   if (/(dolor|me duele)/.test(text)) {
-    return greet('el dolor puede ser físico o emocional, y ambos importan. Cuéntame con tus palabras: ¿qué dolor estás sintiendo ahora mismo, dónde lo sientes y desde cuándo?');
+    return greet('gracias por decírmelo. Quiero entender el impacto en tu trabajo: ¿ese malestar te está limitando alguna tarea o actividad específica estos días?');
   }
 
   if (/(gracias|perfecto|genial|excelente|great)/.test(text)) {
-    return greet('gracias a ti por confiar y compartir. Que lo que has dicho hoy te quede claro: estás dando un paso importante. Si quieres, podemos seguir profundizando o dejar aquí la sesión por hoy. ¿Cómo prefieres continuar?');
+    return greet('gracias a ti por tu tiempo y tu franqueza. Lo que compartiste ayuda a entender mejor el clima del equipo. Si quieres, seguimos profundizando o cerramos aquí la entrevista por hoy. ¿Cómo prefieres continuar?');
   }
 
   if (/(quién eres|quien eres|qué eres|que eres|sobre ti)/.test(text)) {
-    return 'Soy Mr Hunter, un entrevistador profesional y motivador. Estoy aquí para escucharte sin juicios y ayudarte a poner en palabras lo que sientes: dolor, cansancio, problemas en el trabajo, pérdidas o conflictos con personas. ¿Por cuál te gustaría empezar?';
+    return 'Soy Mr Hunter, un entrevistador de clima laboral y procesos dentro de tu empresa. Estoy aquí para conocer cómo trabajas: qué obstáculos enfrentas, qué herramientas o procesos te frenan y qué mejoras crees que harían tu trabajo más fácil. ¿Por dónde quieres empezar?';
   }
 
-  return greet('te escucho y no juzgo nada de lo que compartas: tu experiencia es válida. Cuéntame con tus palabras qué está pasando: ¿es un dolor o cansancio, algo del trabajo, una pérdida o un conflicto con alguien? Por ahí podemos empezar.');
+  return greet('gracias por compartir. Quiero entender bien tu situación para ayudarte. Cuéntame con tus palabras: ¿qué es lo que más te está complicando o frenando en tu trabajo estos días, y desde cuándo?');
 }
 
 export async function sendMessage(conversation, onToken, onNotes, userName) {
