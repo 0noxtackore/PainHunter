@@ -68,7 +68,7 @@ function buildMessages(conversation, userName) {
     if (candidates[0]?.role === 'assistant') candidates = candidates.slice(1);
   }
 
-  const budget = 30000;
+  const budget = 12000;
   const messages = [{ role: 'system', content: system }];
   let used = Math.floor(system.length / 4);
 

@@ -13,7 +13,7 @@ export function subscribeConversations(uid, callback) {
         return;
       }
       const list = Object.entries(raw).map(([id, data]) => ({ id, ...data }));
-      list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+      list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       callback(list);
     },
     () => callback(null)

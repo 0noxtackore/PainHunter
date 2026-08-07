@@ -65,12 +65,31 @@ export function useChat() {
   );
 
   const saveTimerRef = useRef(null);
+  const lastSavedRef = useRef({});
+
+  const snapshotOf = (conversation) => {
+    if (!conversation) return null;
+    return JSON.stringify({
+      title: conversation.title || '',
+      messages: conversation.messages || [],
+      notas: conversation.notas || [],
+      conclusion: conversation.conclusion || '',
+      esDolor: conversation.esDolor || false,
+      recomendacion: conversation.recomendacion || '',
+    });
+  };
 
   useEffect(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      conversations.forEach((c) => save(c));
-    }, 800);
+      conversations.forEach((conversation) => {
+        if (!conversation) return;
+        const snapshot = snapshotOf(conversation);
+        if (lastSavedRef.current[conversation.id] === snapshot) return;
+        lastSavedRef.current[conversation.id] = snapshot;
+        save(conversation);
+      });
+    }, 1500);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
