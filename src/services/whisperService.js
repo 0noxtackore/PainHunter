@@ -1,6 +1,6 @@
 import { pipeline } from '@huggingface/transformers';
 
-const MODEL_ID = 'Xenova/whisper-base';
+const MODEL_ID = 'Xenova/whisper-tiny';
 const TARGET_RATE = 16000;
 let transcriberPromise = null;
 let loadProgress = null;
@@ -65,6 +65,9 @@ export async function transcribeWithWhisper(audioData, language = 'es') {
     language,
     task: 'transcribe',
     return_timestamps: false,
+    chunk_length_s: 30,
+    stride_length_s: 5,
+    condition_on_previous_text: false,
   });
   return (result?.text || '').trim();
 }
