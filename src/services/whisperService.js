@@ -27,9 +27,22 @@ export function loadWhisper() {
   return transcriberPromise;
 }
 
+async function decodeAudioToFloat32(blob) {
+  const arrayBuffer = await blob.arrayBuffer();
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioContext = new AudioContext();
+  try {
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    return audioBuffer.getChannelData(0);
+  } finally {
+    audioContext.close().catch(() => {});
+  }
+}
+
 export async function transcribeWithWhisper(audioData, language = 'es') {
   const transcriber = await loadWhisper();
-  const result = await transcriber(audioData, {
+  const samples = audioData instanceof Blob ? await decodeAudioToFloat32(audioData) : audioData;
+  const result = await transcriber(samples, {
     language,
     task: 'transcribe',
     return_timestamps: false,
