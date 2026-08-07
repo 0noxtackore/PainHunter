@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Loader2, Mic, Send, Square } from 'lucide-react';
 import { transcribeAudio } from '../services/chatService';
 import { getWhisperLoadProgress, isWhisperLoaded } from '../services/whisperService';
+import { isSpeechRecognitionSupported, createSpeechRecognizer } from '../services/speechService';
 import VoiceEqualizer from './VoiceEqualizer';
 
 export default function ChatInput({ onSend, disabled }) {
@@ -14,9 +15,24 @@ export default function ChatInput({ onSend, disabled }) {
   const mediaRecorderRef = useRef(null);
   const streamRef = useRef(null);
   const chunksRef = useRef([]);
+  const recognitionRef = useRef(null);
+  const finalTextRef = useRef('');
+  const recordingIntentRef = useRef(false);
+  const restartTimerRef = useRef(null);
+
+  const useBrowserSpeech = isSpeechRecognitionSupported();
 
   useEffect(() => {
     return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch {
+          /* ignorado */
+        }
+        recognitionRef.current = null;
+      }
+      if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
@@ -63,14 +79,88 @@ export default function ChatInput({ onSend, disabled }) {
     }
   };
 
-  const stopRecording = () => {
+  const stopBrowserRecording = () => {
+    recordingIntentRef.current = false;
+    if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        /* ignorado */
+      }
+      recognitionRef.current = null;
+    }
+    setRecording(false);
+  };
+
+  const startBrowserRecording = () => {
+    setMicError('');
+    recordingIntentRef.current = true;
+    finalTextRef.current = '';
+    setValue('');
+
+    const beginListening = () => {
+      if (!recordingIntentRef.current) return;
+      const recognition = createSpeechRecognizer();
+      if (!recognition) return;
+
+      recognition.onresult = (event) => {
+        let interimText = '';
+        let finalText = '';
+        for (let i = event.resultIndex; i < event.results.length; i += 1) {
+          const result = event.results[i];
+          const transcript = result[0]?.transcript || '';
+          if (result.isFinal) finalText += transcript;
+          else interimText += transcript;
+        }
+        if (finalText) finalTextRef.current += finalText;
+        const combined = (finalTextRef.current + interimText).trim();
+        if (combined) setValue(combined);
+      };
+
+      recognition.onerror = (event) => {
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          recordingIntentRef.current = false;
+          if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+          setMicError('No se pudo acceder al micrófono. Revisa los permisos del navegador.');
+          setRecording(false);
+          recognitionRef.current = null;
+        }
+      };
+
+      recognition.onend = () => {
+        recognitionRef.current = null;
+        if (!recordingIntentRef.current) {
+          setRecording(false);
+          return;
+        }
+        if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
+        restartTimerRef.current = setTimeout(beginListening, 300);
+      };
+
+      recognitionRef.current = recognition;
+      try {
+        recognition.start();
+        setRecording(true);
+      } catch {
+        recordingIntentRef.current = false;
+        setMicError('No se pudo iniciar el reconocimiento de voz.');
+        recognitionRef.current = null;
+        setRecording(false);
+      }
+    };
+
+    beginListening();
+  };
+
+  const stopWhisperRecording = () => {
     const recorder = mediaRecorderRef.current;
     if (recorder && recorder.state !== 'inactive') {
       recorder.stop();
     }
   };
 
-  const startRecording = async () => {
+  const startWhisperRecording = async () => {
     setMicError('');
     let stream;
     try {
@@ -116,8 +206,14 @@ export default function ChatInput({ onSend, disabled }) {
   };
 
   const handleMic = () => {
-    if (recording) stopRecording();
-    else startRecording();
+    if (recording) {
+      if (useBrowserSpeech) stopBrowserRecording();
+      else stopWhisperRecording();
+    } else if (useBrowserSpeech) {
+      startBrowserRecording();
+    } else {
+      startWhisperRecording();
+    }
   };
 
   const micDisabled = disabled || transcribing;
@@ -125,6 +221,7 @@ export default function ChatInput({ onSend, disabled }) {
     downloadProgress && downloadProgress.total > 0
       ? Math.round((downloadProgress.loaded / downloadProgress.total) * 100)
       : null;
+  const liveText = recording && useBrowserSpeech && value.trim() ? value.trim() : '';
 
   return (
     <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-4 sm:px-6">
@@ -162,7 +259,20 @@ export default function ChatInput({ onSend, disabled }) {
 
           {recording ? (
             <div className="min-h-[42px] flex-1">
-              <VoiceEqualizer stream={streamRef.current} active={recording} />
+              {useBrowserSpeech ? (
+                <div className="flex h-full items-center gap-2 px-2">
+                  {liveText ? (
+                    <span className="line-clamp-2 text-sm text-slate-600">{liveText}</span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-sm text-red-500">
+                      <span className="h-2 w-2 animate-ping rounded-full bg-red-500" />
+                      Escuchando…
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <VoiceEqualizer stream={streamRef.current} active={recording} />
+              )}
             </div>
           ) : (
             <textarea
@@ -186,7 +296,8 @@ export default function ChatInput({ onSend, disabled }) {
         </form>
         {(recording || transcribing || micError || downloadProgress) && (
           <div className="mt-2 text-center text-xs text-slate-400">
-            {recording && 'Grabando… pulsa el cuadrado para detener y transcribir.'}
+            {recording && useBrowserSpeech && 'Hablando… pulsa el cuadrado para detener.'}
+            {recording && !useBrowserSpeech && 'Grabando… pulsa el cuadrado para detener y transcribir.'}
             {transcribing && !downloadProgress && 'Transcribiendo tu voz…'}
             {transcribing && downloadProgress && (
               <div className="mx-auto flex max-w-xs flex-col items-center gap-1">
