@@ -5,7 +5,7 @@
 <h1 align="center">PainHunter</h1>
 
 <p align="center">
-  <b>Mr Hunter</b> — your personal well-being assistant. An empathetic AI interviewer that listens without judgment, detects signs of pain and discomfort, and delivers personalized conclusions and recommendations after every conversation.
+  <b>Mr Hunter</b> — your workplace climate interviewer. An AI that talks to employees about their day-to-day work, uncovers the obstacles that slow them down (tools, processes, workload, communication), and rewards them with points and trophies for participating.
 </p>
 
 <p align="center">
@@ -13,8 +13,8 @@
   <img src="https://img.shields.io/badge/Vite-5-purple" />
   <img src="https://img.shields.io/badge/Tailwind-3-38bdf8" />
   <img src="https://img.shields.io/badge/Firebase-FFCA28" />
-  <img src="https://img.shields.io/badge/FastAPI-009688" />
-  <img src="https://img.shields.io/badge/Python-3.11-green" />
+  <img src="https://img.shields.io/badge/OpenRouter-AI-0ea5e9" />
+  <img src="https://img.shields.io/badge/License-MIT-green" />
 </p>
 
 ---
@@ -29,11 +29,10 @@
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [1. Clone the repository](#1-clone-the-repository)
-  - [2. Start the local AI server](#2-start-the-local-ai-server)
-  - [3. Configure the frontend](#3-configure-the-frontend)
-  - [4. Run the frontend](#4-run-the-frontend)
-  - [5. Build for production](#5-build-for-production)
-- [Backend API Endpoints](#backend-api-endpoints)
+  - [2. Configure the frontend](#2-configure-the-frontend)
+  - [3. Run the frontend](#3-run-the-frontend)
+  - [4. Build for production](#4-build-for-production)
+- [Gamification](#gamification)
 - [Database Structure (Firebase Realtime Database)](#database-structure-firebase-realtime-database)
 - [Roles & Super Users](#roles--super-users)
 - [How the AI Interview Works](#how-the-ai-interview-works)
@@ -46,57 +45,62 @@
 
 ## Overview
 
-**PainHunter** is a mental and emotional well-being platform with a private, fully local AI. A user creates an account, starts a chat with **Mr Hunter**, and after every conversation the AI:
+**PainHunter** is a workplace-climate platform. An employee creates an account, has an interview with **Mr Hunter**, and after every conversation the AI:
 
-1. Detects and classifies signs of pain, fatigue, stress, insomnia, and anxiety.
-2. Registers automatic **pain notes** for follow-up.
-3. Generates a **conclusion** and a **recommendation** at the end of each session.
+1. Detects concrete obstacles: slow processes, missing tools or licenses, workload, friction between teams.
+2. Extracts **improvement notes** (internal, visible only to the supervision panel).
+3. Generates a **conclusion** and an actionable **recommendation** for the team lead.
+
+Employees earn **points and trophies** per message and per conversation, keeping them engaged with the interview process.
 
 A supervision panel lets **super users** (Admin, Guard, Boss) inspect users, conversations, and AI-generated diagnoses.
 
-> The entire language model runs **locally** on your machine (llama.cpp + GGUF). No personal data ever leaves your device.
+> The chat runs in the cloud through **OpenRouter** with free models. No local model is required.
 
 ---
 
 ## Features
 
-- **Chat with Mr Hunter** — an empathetic interviewer that asks one open question at a time.
-- **Local AI (private)** — Qwen 1.5B / 0.5B GGUF models served by a Python FastAPI backend.
-- **Voice transcription** — audio messages transcribed with `faster-whisper` (Whisper).
-- **Automatic pain notes** — the model emits structured notes (`###NOTAS###`) extracted at stream time.
-- **Pain detection & classification** — `es_dolor` flag from AI decision plus keyword matching.
-- **AI conclusion & recommendation** — generated at the end of every conversation.
+- **Workplace interview with Mr Hunter** — an empathetic interviewer that asks one open question at a time about tools, processes, workload and communication.
+- **Cloud AI (OpenRouter)** — free models with automatic fallback if the primary model is unavailable.
+- **Voice transcription** — audio messages transcribed in-browser with `transformers.js` (Whisper), with a local FastAPI server as fallback.
+- **Automatic improvement notes** — the model emits structured notes (`###NOTAS###`), hidden from the streaming chat and stored for the panel.
+- **Obstacle detection** — `es_dolor` flag from AI decision plus keyword matching.
+- **AI conclusion & recommendation** — generated at the end of every conversation for the supervision panel.
+- **Gamification** — XP, footprints, levels, streaks and 12 trophies per conversation.
 - **Authentication** — Firebase Auth (email/password) with registration.
-- **Realtime Database** — users, conversations, notes, and admin roles in Firebase RTDB.
+- **Realtime Database** — users, conversations, gamification and admin roles in Firebase RTDB.
 - **Super-user panel** — Admin, Guard and Boss roles with stats and conversation inspection.
-- **Toast notifications** — global notification system.
-- **Landing page** — official marketing page with hero, features, testimonials and FAQ.
+- **Toast notifications with sound** — reward notifications play `coins.mp3`.
+- **Landing page** — official marketing page with hero, features, steps, testimonials and FAQ.
 
 ---
 
 ## Architecture
 
 ```
-┌──────────────────────────┐         ┌───────────────────────────────┐
-│  React + Vite (Netlify)  │  HTTP   │  Python FastAPI (localhost)   │
-│                          │ ──────► │  /api/chat/stream  (SSE)      │
-│  - Chat UI               │  SSE    │  /api/transcribe   (Whisper)  │
-│  - Landing page          │ ◄────── │  /api/conclusion              │
-│  - Admin panel           │         │  /api/title                   │
-└──────────────────────────┘         └───────────────────────────────┘
-        │                                     │
-        │ Firebase Auth + Realtime Database   │ llama.cpp (Qwen GGUF)
-        ▼                                     ▼
-┌──────────────────────────┐         ┌───────────────────────────────┐
-│  Firebase (cloud)        │         │  Local model (your machine)   │
-│  users / conversations / │         │  qwen2.5-*-q4_k_m.gguf        │
-│  admins / notes          │         └───────────────────────────────┘
+┌──────────────────────────┐          ┌───────────────────────────────┐
+│  React + Vite (Netlify)  │   HTTP   │  OpenRouter API (cloud)       │
+│                          │ ──────► │  /api/v1/chat/completions      │
+│  - Chat UI (SSE stream)  │   SSE    │  free models + fallback       │
+│  - Landing page          │ ◄────── │  - chat stream                │
+│  - Admin panel           │          │  - title                      │
+└──────────────────────────┘          │  - conclusion (JSON)          │
+        │                             └───────────────────────────────┘
+        │ Firebase Auth + Realtime Database
+        ▼
+┌──────────────────────────┐
+│  Firebase (cloud)        │   Local (optional, fallback):
+│  users / conversations / │   Python FastAPI on :8000
+│  admins / gamification / │   - /api/transcribe (Whisper)
+│  notes                   │
 └──────────────────────────┘
 ```
 
 - The **frontend** talks to **Firebase** for auth and persistence.
-- The **backend** runs locally on `localhost:8000` and serves the LLM via Server-Sent Events (SSE).
-- Streaming responses also carry structured **notes** parsed in real time.
+- Chat, titles and conclusions are generated by **OpenRouter** in the cloud.
+- Voice transcription runs in the browser first; if unavailable, it falls back to the local FastAPI server.
+- Streaming responses carry structured **notes** parsed in real time and hidden from the user.
 
 ---
 
@@ -105,8 +109,9 @@ A supervision panel lets **super users** (Admin, Guard, Boss) inspect users, con
 | Layer | Technology |
 |---|---|
 | Frontend | React 18, Vite 5, Tailwind CSS 3, React Router 6, Lucide icons |
-| Backend | Python, FastAPI, Uvicorn, llama-cpp-python |
-| ML models | Qwen 2.5 1.5B / 0.5B (GGUF Q4_K_M), faster-whisper |
+| AI (cloud) | OpenRouter API, free models (`google/gemma-4-31b-it:free`) with fallback list |
+| AI (local, fallback) | Python, FastAPI, faster-whisper |
+| Voice (browser) | transformers.js + whisper-tiny |
 | Data & Auth | Firebase Auth, Firebase Realtime Database |
 | Deployment | Vite static build → Netlify (frontend only) |
 
@@ -116,30 +121,34 @@ A supervision panel lets **super users** (Admin, Guard, Boss) inspect users, con
 
 ```
 PainHunter/
-├── index.html
+├── index.html                # Metadata + social/OG tags
 ├── package.json
 ├── tailwind.config.js
-├── .env                        # Frontend Firebase env vars (not committed)
+├── vite.config.js
+├── netlify.toml
+├── favicon.ico               # Project icon (local, not served)
+├── LICENSE                   # MIT
+├── .env                      # Frontend env vars (not committed)
 ├── public/
-│   └── img/                    # Logos and images
-├── server/
-│   ├── app.py                  # FastAPI backend (chat, transcribe, conclusion, title)
+│   ├── favicon.png
+│   ├── sounds/coins.mp3      # Reward notification sound
+│   └── img/                  # Logos and images
+├── server/                   # Optional local Whisper fallback
+│   ├── app.py                # FastAPI backend (transcribe)
 │   ├── requirements.txt
-│   ├── start-ai.bat            # One-click local AI launcher (Windows)
-│   ├── scripts/
-│   │   └── download_model.py   # Downloads the GGUF model
-│   └── models/                 # GGUF model files (downloaded)
-│       ├── qwen2.5-0.5b-instruct-q4_k_m.gguf
-│       └── qwen2.5-1.5b-instruct-q4_k_m.gguf
+│   ├── start-ai.bat
+│   └── venv/                 # Local virtual environment
 └── src/
-    ├── main.jsx                # Routes and providers
-    ├── firebase.js             # Firebase initialization
-    ├── index.css               # Tailwind + custom animations
-    ├── contexts/               # AuthContext, ToastContext
-    ├── hooks/                  # useChat, usePageTitle, useReveal
-    ├── services/               # chatService, adminService, firebaseService
-    ├── pages/                  # LandingPage, AuthPage, SuperUserLogin, AdminPanel, App
-    └── App.jsx                 # Main chat application
+    ├── main.jsx              # Routes and providers
+    ├── firebase.js           # Firebase initialization
+    ├── index.css             # Tailwind + custom animations
+    ├── contexts/             # AuthContext, ToastContext
+    ├── hooks/                # useChat, useGamification, usePageTitle, useReveal
+    ├── services/             # openRouterService, chatService, adminService,
+    │                         # gamificationService, whisperService, chatStorage
+    ├── components/           # Chat, Sidebar, GamificationBar, Messages, ...
+    ├── pages/                # LandingPage, AuthPage, SuperUserLogin, AdminPanel
+    └── App.jsx               # Main chat application
 ```
 
 ---
@@ -149,8 +158,8 @@ PainHunter/
 ### Prerequisites
 
 - **Node.js** 18+ and npm
-- **Python** 3.10+ (with `pip`)
 - A **Firebase project** with Auth (email/password) and Realtime Database enabled
+- An **OpenRouter API key** (free) at https://openrouter.ai/keys
 
 ### 1. Clone the repository
 
@@ -159,30 +168,9 @@ git clone <your-repo-url>
 cd PainHunter
 ```
 
-### 2. Start the local AI server
+### 2. Configure the frontend
 
-> On Windows, just double-click `server\start-ai.bat`. It creates a virtual environment, installs dependencies, downloads the model (if missing) and starts the server at `http://localhost:8000`.
-
-```bash
-cd server
-python -m venv venv
-venv\Scripts\activate          # Windows (or `source venv/bin/activate` on macOS/Linux)
-pip install --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu "llama-cpp-python"
-pip install -r requirements.txt
-python scripts\download_model.py 0.5b   # or 1.5b
-python app.py
-```
-
-Check the server is up:
-
-```bash
-curl http://localhost:8000/health
-# → {"status": "ok"}
-```
-
-### 3. Configure the frontend
-
-Create a `.env` file in the project root with your Firebase credentials:
+Create a `.env` file in the project root:
 
 ```env
 VITE_FIREBASE_API_KEY=AIza...
@@ -192,19 +180,22 @@ VITE_FIREBASE_PROJECT_ID=your-project
 VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=...
 VITE_FIREBASE_APP_ID=1:...
-VITE_FIREBASE_MEASUREMENT_ID=G-...
+
+# OpenRouter — used for chat, titles and conclusions.
+VITE_OPENROUTER_API_KEY=sk-or-...
+VITE_OPENROUTER_MODEL=google/gemma-4-31b-it:free
 ```
 
-### 4. Run the frontend
+### 3. Run the frontend
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://localhost:5173` and you are ready to chat with Mr Hunter.
+Open `http://localhost:5173` and you are ready to interview with Mr Hunter.
 
-### 5. Build for production
+### 4. Build for production
 
 ```bash
 npm run build
@@ -214,48 +205,19 @@ The static site is generated in the `dist/` folder.
 
 ---
 
-## Backend API Endpoints
+## Gamification
 
-| Method | Endpoint | Description |
+Progress is tracked **per conversation** under `gamification/{uid}/{conversationId}`:
+
+| Action | XP | Footprints |
 |---|---|---|
-| `GET` | `/health` | Health check |
-| `POST` | `/api/chat/stream` | Streaming chat (SSE). Returns `content` chunks and parsed `notes`. |
-| `POST` | `/api/transcribe` | Transcribes an uploaded audio file (Whisper). |
-| `POST` | `/api/conclusion` | Generates `{ content, es_dolor, recomendacion }` for a conversation. |
-| `POST` | `/api/title` | Generates a short conversation title. |
+| Send a message | 10 | 1 |
+| Share an obstacle (pain keyword) | +15 | +3 |
+| Complete a conversation | +25 | — |
 
-**`/api/chat/stream` request body**
-
-```json
-{
-  "user_name": "Angello",
-  "messages": [
-    { "role": "user", "content": "Hola, últimamente me siento muy cansado." }
-  ]
-}
-```
-
-**SSE response**
-
-```
-data: {"content":"Entiendo, Angello..."}
-
-data: {"content":"..."}
-
-data: {"notes":["Lleva cansancio hace meses","Menciona dolores de cabeza"]}
-
-data: [DONE]
-```
-
-**`/api/conclusion` response**
-
-```json
-{
-  "content": "El usuario, Angello, se encuentra en una situación de cansancio...",
-  "es_dolor": true,
-  "recomendacion": "Asegúrate de tomar descansos regulares..."
-}
-```
+- **Levels** grow every `level * 100` XP (level 1 = 100 XP, level 2 = 200, ...).
+- **Trophies** (12 total) unlock on milestones: first message, 10/50 messages, first/5 conversations, obstacles shared, levels, streaks and finishing your first interview.
+- Reward notifications show a toast and play `public/sounds/coins.mp3`.
 
 ---
 
@@ -275,16 +237,23 @@ pain-hunter-default-rtdb (europe-west1)
 │       └── {chatId}/
 │           ├── title: string
 │           ├── messages: [...]
-│           ├── notas: [...]
+│           ├── notas: [...]            # improvement notes (panel only)
 │           ├── conclusion: string
 │           ├── es_dolor: boolean
-│           └── recomendacion: string
+│           ├── recomendacion: string
+│           ├── createdAt / updatedAt
+└── gamification/
+    └── {uid}/
+        └── {conversationId}/
+            ├── xp, huellas, messages, conversations, painNotes
+            ├── trophies: { ... }
+            ├── lastActiveDay, streak, bestStreak, conclusionDone
 ```
 
 **Security rules (summary)**
 
-- Regular users can only read/write their own `conversations/{uid}` node.
-- Users with a role in `admins/{uid}` can read `users`, `conversations` and `admins`.
+- Regular users can only read/write their own `conversations/{uid}` and `gamification/{uid}` nodes.
+- Users with a role in `admins/{uid}` can read `users`, `conversations`, `gamification` and `admins`.
 
 ---
 
@@ -296,47 +265,33 @@ pain-hunter-default-rtdb (europe-west1)
 | **VIGILANTE** (Guard) | Can monitor conversations |
 | **BOSS** | Highest-level monitoring |
 
-Super users log in through the dedicated `/superusers` route. A normal login attempt with a super-user account is blocked with a toast notification directing them to the correct access point.
+Super users log in through the dedicated `/superusers` route. Public pages (landing, login) do **not** expose the super-user access link.
 
 ---
 
 ## How the AI Interview Works
 
-1. The user starts a conversation with Mr Hunter.
-2. Mr Hunter follows a structured method: **opening → exploration → deepening (5 Whys) → motivation → closing**.
-3. The model is instructed to always respond in Spanish, 1–3 sentences, with **one question at a time**.
-4. When the user shares important details, the model appends `###NOTAS###` followed by a JSON list — the backend extracts these in real time and saves them as **pain notes**.
-5. After the conversation, `/api/conclusion` analyzes the messages and produces:
-   - **content** — the AI conclusion,
-   - **es_dolor** — `true` if the conversation indicates pain/discomfort (AI decision or keyword match),
-   - **recomendacion** — a tailored recommendation.
-6. The conclusion, pain classification and recommendation are persisted to the conversation node.
+1. The user starts an interview with Mr Hunter.
+2. Mr Hunter follows a structured method: **opening → exploration → deepening (5 Whys) → motivation → closing**, always in Spanish, 1–3 sentences, one question at a time.
+3. When the user shares important details, the model appends `###NOTAS###` followed by a JSON list. The stream parser hides everything after the marker from the chat and saves the notes for the panel.
+4. The conclusion endpoint analyzes the messages and returns:
+   - **conclusion** — a short summary of the employee's situation,
+   - **es_dolor** — `true` if a real work obstacle was described (AI decision or keyword match),
+   - **recomendacion** — an actionable recommendation.
+5. The AI is instructed to **never** mention internal notes, observations or registries to the employee — it only talks about the interview and the points earned.
 
 ---
 
 ## Deployment
 
-### Frontend (Netlify)
-
-The frontend is a static Vite site and deploys directly to Netlify:
-
-```bash
-npm run build
-```
+The frontend is a static Vite site and deploys to Netlify:
 
 - **Build command:** `npm run build`
 - **Publish directory:** `dist`
 
-### Backend
+Set the same `VITE_*` variables above as **Netlify environment variables**.
 
-> **Note:** Netlify **cannot** run the Python AI backend (persistent process, local GGUF model, no GPU/CPU guarantees).
-
-To make the AI work in production you have to host the FastAPI backend elsewhere:
-
-1. **Tunnel (demo):** expose your local server with Cloudflare Tunnel or ngrok and update `API_URL` in `src/services/chatService.js`.
-2. **Render / Railway:** deploy `server/` as a web service (requires ≥ ~2 GB RAM for the 1.5B model).
-3. **VPS:** a small server (e.g. Hetzner, Oracle Cloud Free) running `python app.py`.
-4. **Cloud AI API:** replace `llama_cpp` calls with OpenAI / OpenRouter API and drop the Python backend entirely.
+The optional local Whisper server (`server/`) is **not** deployed; browser transcription covers speech-to-text in production.
 
 ---
 
@@ -351,9 +306,10 @@ To make the AI work in production you have to host the FastAPI backend elsewhere
 | `VITE_FIREBASE_STORAGE_BUCKET` | Storage bucket |
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | Sender ID |
 | `VITE_FIREBASE_APP_ID` | App ID |
-| `VITE_FIREBASE_MEASUREMENT_ID` | Measurement ID |
+| `VITE_OPENROUTER_API_KEY` | OpenRouter API key for chat, titles and conclusions |
+| `VITE_OPENROUTER_MODEL` | Free model to use (with automatic fallback list) |
 
-> All Firebase credentials are read from `.env` (gitignored). **Never commit real keys.**
+> All credentials are read from `.env` (gitignored). **Never commit real keys.**
 
 ---
 
@@ -362,14 +318,13 @@ To make the AI work in production you have to host the FastAPI backend elsewhere
 | Problem | Solution |
 |---|---|
 | `npm.ps1` is blocked on Windows PowerShell | Use `npm.cmd run dev` instead of `npm run dev` |
-| Chat answers very slowly | Switch to the 0.5B model or increase `max_tokens`; CPU inference is inherently slow |
+| Chat says OpenRouter key is missing | Add `VITE_OPENROUTER_API_KEY` to `.env` and restart the dev server |
+| Model answers slowly or errors | Switch `VITE_OPENROUTER_MODEL` to another free model; the app auto-falls-back |
 | `Permission denied` on database writes | Check that the Firebase rules allow users to write their own `conversations/{uid}` node |
-| Backend changes not applied | Restart the Python server (`python app.py`) after editing `app.py` |
-| Model download fails | Run `python scripts\download_model.py 0.5b` again or download the GGUF manually into `server/models/` |
-| CORS errors | Make sure `localhost:8000` is allowed in `app.py`'s CORS configuration |
+| Voice transcription fails in browser | Start the fallback server: `cd server && python app.py` (Whisper via FastAPI) |
 
 ---
 
 ## License
 
-This project is for educational and demonstration purposes. The **Qwen** models are subject to their original license; check [QwenLM](https://github.com/QwenLM) for details.
+Released under the [MIT License](./LICENSE).
