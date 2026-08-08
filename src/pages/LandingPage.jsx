@@ -246,17 +246,17 @@ export default function LandingPage() {
               trabajo, detecta los obstáculos que te frenan y te recompensa por compartir tus
               experiencias y aportar al clima del equipo.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-8 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center">
               <Link
                 to="/register"
-                className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-brand-800 to-brand-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-700/25 transition hover:shadow-xl hover:shadow-brand-700/35"
+                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-brand-800 to-brand-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-700/25 transition hover:shadow-xl hover:shadow-brand-700/35 sm:inline-flex sm:justify-start"
               >
                 Empezar ahora
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <button
                 onClick={() => scrollTo('how')}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 sm:inline-flex sm:w-auto"
               >
                 Ver cómo funciona
               </button>
