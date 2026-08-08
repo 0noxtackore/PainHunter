@@ -36,6 +36,9 @@
 - [Estructura de la base de datos (Firebase Realtime Database)](#estructura-de-la-base-de-datos-firebase-realtime-database)
 - [Roles y superusuarios](#roles-y-superusuarios)
 - [Cómo funciona la entrevista con IA](#cómo-funciona-la-entrevista-con-ia)
+- [Casos de uso reales](#casos-de-uso-reales)
+- [Limitaciones actuales](#limitaciones-actuales)
+- [Roadmap](#roadmap)
 - [Despliegue](#despliegue)
 - [Variables de entorno](#variables-de-entorno)
 - [Solución de problemas](#solución-de-problemas)
@@ -279,6 +282,53 @@ Los superusuarios inician sesión por la ruta dedicada `/superusers`. Las págin
    - **es_dolor** — `true` si describió un obstáculo real (decisión de la IA o coincidencia de palabras clave),
    - **recomendacion** — una recomendación accionable.
 5. La IA tiene la instrucción de **nunca** mencionar notas internas, observaciones o registros al empleado — solo habla de la entrevista y de los puntos ganados.
+
+### Diagrama de flujo
+
+```
+   ┌─────────┐      ┌──────────────┐      ┌─────────┐      ┌──────────────┐      ┌─────────┐
+   │ Usuario │ ───► │  Mr Hunter   │ ───► │  Notas  │ ───► │  Conclusión  │ ───► │  Panel  │
+   │         │  chat│ (entrevista) │      │ (interna)│      │  y reco.    │      │(supervisor)│
+   └─────────┘      └──────────────┘      └─────────┘      └──────────────┘      └─────────┘
+```
+
+Un empleado habla con Mr Hunter → la IA detecta obstáculos y guarda notas de mejora → se genera una conclusión y una recomendación → el panel de supervisión lo revisa todo.
+
+---
+
+## Casos de uso reales
+
+PainHunter ayuda al liderazgo a detectar señales tempranas en el equipo:
+
+- **Falta de herramientas** — empleados que no pueden hacer su trabajo por falta de software, licencias o accesos.
+- **Procesos lentos** — cuellos de botella en aprobaciones, traspasos o comunicación entre áreas.
+- **Fricción entre equipos** — roces recurrentes entre departamentos que bloquean la entrega.
+- **Sobrecarga laboral** — empleados que asumen más de lo que pueden en silencio.
+
+Con estas señales, los líderes pueden actuar antes de que los problemas pequeños se conviertan en rotación o burnout.
+
+---
+
+## Limitaciones actuales
+
+Ten en cuenta las limitaciones actuales:
+
+- **Solo español** — la entrevista está diseñada y probada en español.
+- **Depende de OpenRouter** — la calidad y disponibilidad del chat dependen de los modelos gratuitos de la API de OpenRouter.
+- **Sin backend propio** — no hay un servicio backend de nuestra propiedad; la persistencia y la autenticación viven en Firebase y la IA en OpenRouter.
+- **Sin dashboards avanzados aún** — el panel ofrece estadísticas e inspección, pero no gráficos ni análisis de tendencias (ver Roadmap).
+
+---
+
+## Roadmap
+
+Hacia dónde va PainHunter:
+
+- **Dashboards con gráficos** — métricas visuales de obstáculos por área.
+- **Análisis de tendencias** — evolución de los puntos de dolor en el tiempo.
+- **Exportación de reportes** — informes PDF/CSV de los diagnósticos.
+- **Panel de métricas por equipo** — KPIs por equipo o departamento.
+- **Alertas automáticas** — notificar a un líder cuando se detecte un obstáculo grave.
 
 ---
 

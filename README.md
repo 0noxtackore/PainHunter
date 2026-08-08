@@ -36,6 +36,9 @@
 - [Database Structure (Firebase Realtime Database)](#database-structure-firebase-realtime-database)
 - [Roles & Super Users](#roles--super-users)
 - [How the AI Interview Works](#how-the-ai-interview-works)
+- [Real-world Use Cases](#real-world-use-cases)
+- [Current Limitations](#current-limitations)
+- [Roadmap](#roadmap)
 - [Deployment](#deployment)
 - [Environment Variables](#environment-variables)
 - [Troubleshooting](#troubleshooting)
@@ -279,6 +282,53 @@ Super users log in through the dedicated `/superusers` route. Public pages (land
    - **es_dolor** — `true` if a real work obstacle was described (AI decision or keyword match),
    - **recomendacion** — an actionable recommendation.
 5. The AI is instructed to **never** mention internal notes, observations or registries to the employee — it only talks about the interview and the points earned.
+
+### Flow diagram
+
+```
+   ┌─────────┐      ┌──────────────┐      ┌─────────┐      ┌──────────────┐      ┌─────────┐
+   │ Usuario │ ───► │  Mr Hunter   │ ───► │  Notas  │ ───► │  Conclusión  │ ───► │  Panel  │
+   │         │  chat│ (entrevista) │      │ (interna)│      │  y reco.    │      │(supervisor)│
+   └─────────┘      └──────────────┘      └─────────┘      └──────────────┘      └─────────┘
+```
+
+An employee talks to Mr Hunter → the AI detects obstacles and saves improvement notes → a conclusion and recommendation are generated → the supervision panel reviews everything.
+
+---
+
+## Real-world Use Cases
+
+PainHunter helps leadership detect early warnings in the team:
+
+- **Missing tools** — employees who can't do their job because they lack software, licenses or access.
+- **Slow processes** — bottlenecks in approvals, handoffs or communication between areas.
+- **Cross-team friction** — recurring friction between departments that blocks delivery.
+- **Work overload** — employees silently taking on more than they can handle.
+
+With these signals, managers can act before small issues become turnover or burnout.
+
+---
+
+## Current Limitations
+
+Be aware of the current constraints:
+
+- **Spanish only** — the interview is designed and tested in Spanish.
+- **Depends on OpenRouter** — chat quality and availability rely on the free models of the OpenRouter API.
+- **No dedicated backend** — there is no owned backend service; persistence and auth live on Firebase and the AI on OpenRouter.
+- **No advanced dashboards yet** — the panel offers stats and inspection, but no charts or trend analysis (see Roadmap).
+
+---
+
+## Roadmap
+
+Where PainHunter is heading:
+
+- **Dashboards with charts** — visual metrics of obstacles per area.
+- **Trend analysis** — evolution of pain points over time.
+- **Report export** — PDF/CSV reports of diagnoses.
+- **Per-team metrics panel** — KPIs by team or department.
+- **Automatic alerts** — notify a leader when a serious obstacle is detected.
 
 ---
 
