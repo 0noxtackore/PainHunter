@@ -108,6 +108,16 @@
     }
   }
 
+  @keyframes logoPulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.25;
+    }
+  }
+
   @keyframes pulseRing {
     0% {
       transform: scale(1);
@@ -155,4 +165,8 @@
   border-radius: inherit;
   background: inherit;
   animation: pulseRing 2s ease-out infinite;
+}
+
+.animate-logo-pulse {
+  animation: logoPulse 1.8s ease-in-out infinite;
 }

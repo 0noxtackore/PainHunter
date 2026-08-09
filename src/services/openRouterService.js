@@ -139,7 +139,12 @@ function parseNotes(text) {
   } catch {
     notes = tail
       .split(/[\n,;]+/)
-      .map((line) => line.replace(/^\s*[-*•\d.)]+\s*/, '').trim())
+      .map((line) =>
+        line
+          .replace(/^\s*[-*•\d.)]+\s*/, '')
+          .replace(/^\s*["\[]|["\]]\s*$/g, '')
+          .trim()
+      )
       .filter(Boolean);
   }
   return { content: head.trim(), notes };

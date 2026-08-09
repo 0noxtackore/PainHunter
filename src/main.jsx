@@ -18,6 +18,18 @@ function LoadingScreen() {
   );
 }
 
+function AdminLoadingScreen() {
+  return (
+    <div className="flex h-screen items-center justify-center overflow-hidden bg-slate-50">
+      <img
+        src="/img/logo_loading.png"
+        alt="PainHunter"
+        className="animate-logo-pulse max-h-[80vh] max-w-[80vw] object-contain"
+      />
+    </div>
+  );
+}
+
 function ProtectedApp() {
   const { user, role, roleLoaded, initializing } = useAuth();
 
@@ -30,7 +42,7 @@ function ProtectedApp() {
 function AdminRoute() {
   const { user, role, roleLoaded, initializing } = useAuth();
 
-  if (initializing || !roleLoaded) return <LoadingScreen />;
+  if (initializing || !roleLoaded) return <AdminLoadingScreen />;
   if (!user) return <Navigate to="/" replace />;
   if (role !== 'lider') return <Navigate to="/chat" replace />;
   return <AdminPanel />;
