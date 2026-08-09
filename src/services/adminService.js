@@ -2,10 +2,7 @@ import { onValue, ref } from 'firebase/database';
 import { rtdb } from '../firebase';
 
 export function sanitizeOrg(organizacion) {
-  return (organizacion || '')
-    .trim()
-    .replace(/[.#$[\]/]/g, '')
-    .toLowerCase();
+  return (organizacion || '').trim().replace(/[.#$[\]/]/g, '');
 }
 
 export function subscribeRole(uid, callback) {

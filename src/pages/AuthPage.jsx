@@ -82,11 +82,11 @@ export default function AuthPage({ mode }) {
     try {
       if (isRegister) {
         await signup(name.trim(), email.trim(), password, gender, organizacion, role);
-        navigate('/chat');
+        navigate(role === 'lider' ? '/admin' : '/chat');
         return;
       }
       await login(email.trim(), password);
-      navigate('/chat');
+      navigate('/');
     } catch (err) {
       if (err?.message === 'MAX_LEADERS') {
         setError({ message: 'Esta organización ya tiene 2 líderes registrados.' });

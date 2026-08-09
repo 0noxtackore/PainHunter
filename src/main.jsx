@@ -19,34 +19,34 @@ function LoadingScreen() {
 }
 
 function ProtectedApp() {
-  const { user, role, initializing } = useAuth();
+  const { user, role, roleLoaded, initializing } = useAuth();
 
-  if (initializing) return <LoadingScreen />;
+  if (initializing || !roleLoaded) return <LoadingScreen />;
   if (!user) return <Navigate to="/" replace />;
   if (role === 'lider') return <Navigate to="/admin" replace />;
   return <App />;
 }
 
 function AdminRoute() {
-  const { user, role, initializing } = useAuth();
+  const { user, role, roleLoaded, initializing } = useAuth();
 
-  if (initializing) return <LoadingScreen />;
+  if (initializing || !roleLoaded) return <LoadingScreen />;
   if (!user) return <Navigate to="/" replace />;
   if (role !== 'lider') return <Navigate to="/chat" replace />;
   return <AdminPanel />;
 }
 
 function PublicOnly({ children }) {
-  const { user, role, initializing } = useAuth();
-  if (initializing) return null;
+  const { user, role, roleLoaded, initializing } = useAuth();
+  if (initializing || !roleLoaded) return null;
   if (user && role === 'lider') return <Navigate to="/admin" replace />;
   if (user) return <Navigate to="/chat" replace />;
   return children;
 }
 
 function Landing() {
-  const { user, role, initializing } = useAuth();
-  if (initializing) return null;
+  const { user, role, roleLoaded, initializing } = useAuth();
+  if (initializing || !roleLoaded) return null;
   if (user && role === 'lider') return <Navigate to="/admin" replace />;
   if (user) return <Navigate to="/chat" replace />;
   return <LandingPage />;

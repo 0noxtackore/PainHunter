@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [organizacion, setOrganizacion] = useState('');
+  const [roleLoaded, setRoleLoaded] = useState(false);
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
@@ -31,11 +32,14 @@ export function AuthProvider({ children }) {
     if (!user?.uid) {
       setRole(null);
       setOrganizacion('');
+      setRoleLoaded(false);
       return undefined;
     }
+    setRoleLoaded(false);
     return subscribeRole(user.uid, (info) => {
       setRole(info?.role || null);
       setOrganizacion(info?.organizacion || '');
+      setRoleLoaded(true);
     });
   }, [user?.uid]);
 
@@ -46,6 +50,7 @@ export function AuthProvider({ children }) {
       user,
       role,
       organizacion,
+      roleLoaded,
       isAdmin,
       initializing,
       login: (email, password) => signInWithEmailAndPassword(auth, email, password),
@@ -91,7 +96,7 @@ export function AuthProvider({ children }) {
       },
       logout: () => signOut(auth),
     }),
-    [user, role, organizacion, isAdmin, initializing]
+    [user, role, organizacion, roleLoaded, isAdmin, initializing]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
