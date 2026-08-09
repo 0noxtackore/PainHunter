@@ -21,6 +21,7 @@ const ROLE_LABELS = {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
+  const [organizacion, setOrganizacion] = useState('');
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
@@ -34,9 +35,13 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!user?.uid) {
       setRole(null);
+      setOrganizacion('');
       return undefined;
     }
-    return subscribeRole(user.uid, setRole);
+    return subscribeRole(user.uid, (info) => {
+      setRole(info?.role || null);
+      setOrganizacion(info?.organizacion || '');
+    });
   }, [user?.uid]);
 
   const isAdmin = !!role && ROLE_LABELS[role] != null;
@@ -45,18 +50,23 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       role,
+      organizacion,
       isAdmin,
       initializing,
       login: (email, password) => signInWithEmailAndPassword(auth, email, password),
-      signup: async (name, email, password, gender) => {
+      signup: async (name, email, password, gender, organizacion = '') => {
         const credentials = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(credentials.user, { displayName: name });
-        await saveProfile(credentials.user.uid, { name, gender: gender || 'otro' }).catch(() => {});
+        await saveProfile(credentials.user.uid, {
+          name,
+          gender: gender || 'otro',
+          organizacion: organizacion.trim(),
+        }).catch(() => {});
         return credentials;
       },
       logout: () => signOut(auth),
     }),
-    [user, role, isAdmin, initializing]
+    [user, role, organizacion, isAdmin, initializing]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

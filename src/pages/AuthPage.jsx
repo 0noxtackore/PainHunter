@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Building2,
   Eye,
   EyeOff,
   HeartPulse,
@@ -51,6 +52,7 @@ export default function AuthPage({ mode }) {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [gender, setGender] = useState('');
+  const [organizacion, setOrganizacion] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -72,11 +74,15 @@ export default function AuthPage({ mode }) {
       setError({ message: 'Selecciona tu género para personalizar tu saludo.' });
       return;
     }
+    if (isRegister && !organizacion.trim()) {
+      setError({ message: 'Escribe el nombre de tu empresa u organización.' });
+      return;
+    }
     setError(null);
     setBusy(true);
     try {
       if (isRegister) {
-        await signup(name.trim(), email.trim(), password, gender);
+        await signup(name.trim(), email.trim(), password, gender, organizacion);
         navigate('/chat');
         return;
       }
@@ -220,6 +226,23 @@ export default function AuthPage({ mode }) {
                         {option.label}
                       </button>
                     ))}
+                  </div>
+                </Field>
+              )}
+
+              {isRegister && (
+                <Field label="Empresa / Organización">
+                  <div className="relative">
+                    <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      id="organizacion"
+                      type="text"
+                      value={organizacion}
+                      onChange={(event) => setOrganizacion(event.target.value)}
+                      placeholder="Nombre de tu empresa"
+                      required
+                      className={inputClass}
+                    />
                   </div>
                 </Field>
               )}

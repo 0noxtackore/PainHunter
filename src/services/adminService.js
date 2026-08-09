@@ -31,13 +31,13 @@ export function subscribeRole(uid, callback) {
     ref(rtdb, `admins/${uid}`),
     (snapshot) => {
       const data = snapshot.val();
-      callback(data?.role || null);
+      callback(data || null);
     },
     () => callback(null)
   );
 }
 
-export function subscribeAllUsers(callback) {
+export function subscribeAllUsers(callback, organizacion = '') {
   let cachedAdminUids = new Set();
   let timer = null;
   const emit = () => {
@@ -50,8 +50,13 @@ export function subscribeAllUsers(callback) {
           callback([]);
           return;
         }
+        const org = (organizacion || '').trim().toLowerCase();
         const list = Object.entries(raw)
           .filter(([uid]) => !cachedAdminUids.has(uid))
+          .filter(
+            ([, profile]) =>
+              !org || (profile?.organizacion || '').trim().toLowerCase() === org
+          )
           .map(([uid, profile]) => ({ uid, ...profile }));
         list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         callback(list);
@@ -70,26 +75,41 @@ export function subscribeAllUsers(callback) {
   );
 }
 
-export function subscribeAllConversations(callback) {
-  return onValue(
-    ref(rtdb, 'conversations'),
-    (snapshot) => {
-      const raw = snapshot.val();
-      if (!raw) {
-        callback({});
-        return;
-      }
-      const result = {};
-      Object.entries(raw).forEach(([uid, conversations]) => {
-        result[uid] = Object.entries(conversations || {}).map(([id, data]) => ({
-          id,
-          ...data,
-        }));
-      });
-      callback(result);
-    },
-    () => callback({})
-  );
+export function subscribeAllConversations(callback, organizacion = '') {
+  const org = (organizacion || '').trim().toLowerCase();
+  const emit = () => {
+    const usersRef = ref(rtdb, 'users');
+    const convRef = ref(rtdb, 'conversations');
+    onValue(
+      usersRef,
+      (usersSnap) => {
+        const usersRaw = usersSnap.val() || {};
+        onValue(
+          convRef,
+          (snapshot) => {
+            const raw = snapshot.val();
+            if (!raw) {
+              callback({});
+              return;
+            }
+            const result = {};
+            Object.entries(raw).forEach(([uid, conversations]) => {
+              const userOrg = (usersRaw[uid]?.organizacion || '').trim().toLowerCase();
+              if (org && userOrg !== org) return;
+              result[uid] = Object.entries(conversations || {}).map(([id, data]) => ({
+                id,
+                ...data,
+              }));
+            });
+            callback(result);
+          },
+          () => callback({})
+        );
+      },
+      () => callback({})
+    );
+  };
+  return emit();
 }
 
 export async function getRole(uid) {

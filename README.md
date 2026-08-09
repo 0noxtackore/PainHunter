@@ -231,10 +231,12 @@ pain-hunter-default-rtdb (europe-west1)
 ├── users/
 │   └── {uid}/
 │       ├── name: string
-│       └── gender: string
+│       ├── gender: string
+│       └── organizacion: string      # company the user belongs to
 ├── admins/
 │   └── {uid}/
-│       └── role: "ADMIN" | "VIGILANTE" | "BOSS"
+│       ├── role: "ADMIN" | "VIGILANTE" | "BOSS"
+│       └── organizacion: string      # company the admin supervises
 ├── conversations/
 │   └── {uid}/
 │       └── {chatId}/
@@ -257,6 +259,7 @@ pain-hunter-default-rtdb (europe-west1)
 
 - Regular users can only read/write their own `conversations/{uid}` and `gamification/{uid}` nodes.
 - Users with a role in `admins/{uid}` can read `users`, `conversations`, `gamification` and `admins`.
+- Each admin only monitors employees from **their own organization**: the panel filters `users` and `conversations` by `organizacion`.
 
 ---
 

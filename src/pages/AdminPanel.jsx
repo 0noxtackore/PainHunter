@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   Brain,
+  Building2,
   ChevronDown,
   Eye,
   Lightbulb,
@@ -48,7 +49,7 @@ function formatDate(ts) {
 }
 
 export default function AdminPanel() {
-  const { user, role, logout } = useAuth();
+  const { user, role, organizacion, logout } = useAuth();
   const [users, setUsers] = useState([]);
 
   usePageTitle('Panel de administración');
@@ -58,8 +59,8 @@ export default function AdminPanel() {
   const [expandedChat, setExpandedChat] = useState(null);
   const [viewChat, setViewChat] = useState(null);
 
-  useEffect(() => subscribeAllUsers(setUsers), []);
-  useEffect(() => subscribeAllConversations(setConversationsByUser), []);
+  useEffect(() => subscribeAllUsers(setUsers, organizacion), [organizacion]);
+  useEffect(() => subscribeAllConversations(setConversationsByUser, organizacion), [organizacion]);
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -128,6 +129,12 @@ export default function AdminPanel() {
           </div>
         </div>
         <div className="ml-auto flex items-center gap-3 text-xs text-white/70">
+          {organizacion && (
+            <span className="hidden items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 font-semibold text-white sm:inline-flex">
+              <Building2 className="h-3.5 w-3.5" />
+              {organizacion}
+            </span>
+          )}
           <span className="hidden items-center gap-1.5 md:inline-flex">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
             {user?.email}
