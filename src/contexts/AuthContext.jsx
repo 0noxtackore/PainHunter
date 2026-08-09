@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
     if (!user?.uid) {
       setRole(null);
       setOrganizacion('');
-      setRoleLoaded(false);
+      setRoleLoaded(true);
       return undefined;
     }
     setRoleLoaded(false);
