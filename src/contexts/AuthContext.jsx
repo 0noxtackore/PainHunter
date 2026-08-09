@@ -6,17 +6,12 @@ import {
   signOut,
   updateProfile,
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { get, ref, update } from 'firebase/database';
+import { auth, rtdb } from '../firebase';
 import { saveProfile } from '../services/profileService';
-import { subscribeRole } from '../services/adminService';
+import { sanitizeOrg, subscribeRole } from '../services/adminService';
 
 const AuthContext = createContext(null);
-
-const ROLE_LABELS = {
-  ADMIN: 'ADMIN',
-  VIGILANTE: 'VIGILANTE',
-  BOSS: 'BOSS',
-};
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -44,7 +39,7 @@ export function AuthProvider({ children }) {
     });
   }, [user?.uid]);
 
-  const isAdmin = !!role && ROLE_LABELS[role] != null;
+  const isAdmin = role === 'lider';
 
   const value = useMemo(
     () => ({
@@ -54,15 +49,45 @@ export function AuthProvider({ children }) {
       isAdmin,
       initializing,
       login: (email, password) => signInWithEmailAndPassword(auth, email, password),
-      signup: async (name, email, password, gender, organizacion = '') => {
+      signup: async (name, email, password, gender, organizacion = '', role = 'empleado') => {
         const credentials = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(credentials.user, { displayName: name });
-        await saveProfile(credentials.user.uid, {
-          name,
-          gender: gender || 'otro',
-          organizacion: organizacion.trim(),
-        }).catch(() => {});
-        return credentials;
+        try {
+          await updateProfile(credentials.user, { displayName: name });
+          if (role === 'lider') {
+            const org = (organizacion || '').trim();
+            const orgKey = sanitizeOrg(org);
+            const counterRef = ref(rtdb, `organizaciones/${orgKey}/lideres`);
+            const snap = await get(counterRef);
+            const current = snap.exists() ? Number(snap.val()) : 0;
+            if (current >= 2) {
+              throw new Error('MAX_LEADERS');
+            }
+            await update(rtdb, {
+              [`users/${credentials.user.uid}`]: {
+                name,
+                gender: gender || 'otro',
+                organizacion: org,
+                role: 'lider',
+              },
+              [`organizaciones/${orgKey}/lideres`]: current + 1,
+            });
+          } else {
+            await saveProfile(credentials.user.uid, {
+              name,
+              gender: gender || 'otro',
+              organizacion: (organizacion || '').trim(),
+              role: 'empleado',
+            });
+          }
+          return credentials;
+        } catch (err) {
+          try {
+            await credentials.user.delete();
+          } catch {
+            /* sin sesión activa */
+          }
+          throw err;
+        }
       },
       logout: () => signOut(auth),
     }),

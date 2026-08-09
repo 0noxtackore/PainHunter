@@ -162,7 +162,7 @@ export default function Sidebar({
             <Shield className="h-4 w-4" />
             Panel de administración
             <span className="ml-auto rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
-              {role}
+              {role === 'lider' ? 'Líder' : role}
             </span>
           </button>
         )}

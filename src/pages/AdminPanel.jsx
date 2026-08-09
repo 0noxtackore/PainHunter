@@ -19,15 +19,11 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { subscribeAllUsers, subscribeAllConversations } from '../services/adminService';
 
 const ROLE_BADGES = {
-  ADMIN: 'bg-red-600 text-white',
-  VIGILANTE: 'bg-amber-500 text-white',
-  BOSS: 'bg-slate-800 text-white',
+  lider: 'bg-brand-600 text-white',
 };
 
 const ROLE_ICONS = {
-  ADMIN: 'Administrador',
-  VIGILANTE: 'Vigilante',
-  BOSS: 'Jefe',
+  lider: 'Líder',
 };
 
 function firstName(name) {

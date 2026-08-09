@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import App from './App';
 import AuthPage from './pages/AuthPage';
-import SuperUserLogin from './pages/SuperUserLogin';
 import AdminPanel from './pages/AdminPanel';
 import LandingPage from './pages/LandingPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -24,7 +23,7 @@ function ProtectedApp() {
 
   if (initializing) return <LoadingScreen />;
   if (!user) return <Navigate to="/" replace />;
-  if (role) return <Navigate to="/admin" replace />;
+  if (role === 'lider') return <Navigate to="/admin" replace />;
   return <App />;
 }
 
@@ -33,14 +32,14 @@ function AdminRoute() {
 
   if (initializing) return <LoadingScreen />;
   if (!user) return <Navigate to="/" replace />;
-  if (!role) return <Navigate to="/chat" replace />;
+  if (role !== 'lider') return <Navigate to="/chat" replace />;
   return <AdminPanel />;
 }
 
 function PublicOnly({ children }) {
   const { user, role, initializing } = useAuth();
   if (initializing) return null;
-  if (user && role) return <Navigate to="/admin" replace />;
+  if (user && role === 'lider') return <Navigate to="/admin" replace />;
   if (user) return <Navigate to="/chat" replace />;
   return children;
 }
@@ -48,7 +47,7 @@ function PublicOnly({ children }) {
 function Landing() {
   const { user, role, initializing } = useAuth();
   if (initializing) return null;
-  if (user && role) return <Navigate to="/admin" replace />;
+  if (user && role === 'lider') return <Navigate to="/admin" replace />;
   if (user) return <Navigate to="/chat" replace />;
   return <LandingPage />;
 }
@@ -63,7 +62,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<PublicOnly><AuthPage mode="login" /></PublicOnly>} />
               <Route path="/register" element={<PublicOnly><AuthPage mode="register" /></PublicOnly>} />
-              <Route path="/superusers" element={<SuperUserLogin />} />
               <Route path="/admin" element={<AdminRoute />} />
               <Route path="/chat" element={<ProtectedApp />} />
               <Route path="*" element={<Navigate to="/" replace />} />

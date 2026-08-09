@@ -12,11 +12,10 @@ import {
   ShieldCheck,
   Sparkles,
   User,
+  UserCog,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../contexts/ToastContext';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { checkAccountRole } from '../services/adminService';
 import AlertModal from '../components/AlertModal';
 
 function Field({ label, children }) {
@@ -48,11 +47,11 @@ const BRAND_FEATURES = [
 
 export default function AuthPage({ mode }) {
   const { login, signup } = useAuth();
-  const { notify } = useToast();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [gender, setGender] = useState('');
   const [organizacion, setOrganizacion] = useState('');
+  const [role, setRole] = useState('empleado');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -82,28 +81,18 @@ export default function AuthPage({ mode }) {
     setBusy(true);
     try {
       if (isRegister) {
-        await signup(name.trim(), email.trim(), password, gender, organizacion);
+        await signup(name.trim(), email.trim(), password, gender, organizacion, role);
         navigate('/chat');
-        return;
-      }
-      // Verifica primero si la cuenta es de superusuario, sin abrir sesión.
-      const check = await checkAccountRole(email.trim(), password);
-      if (check?.role) {
-        notify(
-          'Esta cuenta es de superusuario. Usa el acceso de superusuarios para entrar al panel.',
-          'warning',
-          8000
-        );
-        return;
-      }
-      if (check?.error) {
-        setError({ message: 'Correo o contraseña incorrectos.' });
         return;
       }
       await login(email.trim(), password);
       navigate('/chat');
     } catch (err) {
-      setError({ message: err?.message || 'Correo o contraseña incorrectos.' });
+      if (err?.message === 'MAX_LEADERS') {
+        setError({ message: 'Esta organización ya tiene 2 líderes registrados.' });
+      } else {
+        setError({ message: err?.message || 'Correo o contraseña incorrectos.' });
+      }
     } finally {
       setBusy(false);
     }
@@ -244,6 +233,43 @@ export default function AuthPage({ mode }) {
                       className={inputClass}
                     />
                   </div>
+                </Field>
+              )}
+
+              {isRegister && (
+                <Field label="Rol en tu organización">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setRole('empleado')}
+                      className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition ${
+                        role === 'empleado'
+                          ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-sm ring-2 ring-brand-500/25'
+                          : 'border-slate-300 bg-white text-slate-600 hover:border-brand-300 hover:bg-brand-50/40'
+                      }`}
+                    >
+                      <User className="h-4 w-4" />
+                      Empleado
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRole('lider')}
+                      className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition ${
+                        role === 'lider'
+                          ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-sm ring-2 ring-brand-500/25'
+                          : 'border-slate-300 bg-white text-slate-600 hover:border-brand-300 hover:bg-brand-50/40'
+                      }`}
+                    >
+                      <UserCog className="h-4 w-4" />
+                      Líder
+                    </button>
+                  </div>
+                  {role === 'lider' && (
+                    <p className="mt-1.5 text-xs text-slate-500">
+                      El líder accede al panel de administración de su organización. Máximo 2
+                      líderes por empresa.
+                    </p>
+                  )}
                 </Field>
               )}
 

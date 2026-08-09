@@ -51,12 +51,12 @@
 **PainHunter** is a workplace-climate platform. An employee creates an account, has an interview with **Mr Hunter**, and after every conversation the AI:
 
 1. Detects concrete obstacles: slow processes, missing tools or licenses, workload, friction between teams.
-2. Extracts **improvement notes** (internal, visible only to the supervision panel).
+2. Extracts **improvement notes** (internal, visible only to the admin panel).
 3. Generates a **conclusion** and an actionable **recommendation** for the team lead.
 
 Employees earn **points and trophies** per message and per conversation, keeping them engaged with the interview process.
 
-A supervision panel lets **super users** (Admin, Guard, Boss) inspect users, conversations, and AI-generated diagnoses.
+An admin panel lets the **leaders** of each organization inspect the users, conversations, and AI-generated diagnoses from their own company.
 
 > The chat runs in the cloud through **OpenRouter** with free models. No local model is required.
 
@@ -69,11 +69,11 @@ A supervision panel lets **super users** (Admin, Guard, Boss) inspect users, con
 - **Voice transcription** — audio messages transcribed in-browser with `transformers.js` (Whisper), with a local FastAPI server as fallback.
 - **Automatic improvement notes** — the model emits structured notes (`###NOTAS###`), hidden from the streaming chat and stored for the panel.
 - **Obstacle detection** — `es_dolor` flag from AI decision plus keyword matching.
-- **AI conclusion & recommendation** — generated at the end of every conversation for the supervision panel.
+- **AI conclusion & recommendation** — generated at the end of every conversation for the admin panel.
 - **Gamification** — XP, footprints, levels, streaks and 12 trophies per conversation.
 - **Authentication** — Firebase Auth (email/password) with registration.
-- **Realtime Database** — users, conversations, gamification and admin roles in Firebase RTDB.
-- **Super-user panel** — Admin, Guard and Boss roles with stats and conversation inspection.
+- **Realtime Database** — users, organizations, conversations, gamification and roles in Firebase RTDB.
+- **Leader panel** — the **Líder** role accesses the panel with stats and conversation inspection for its organization.
 - **Toast notifications with sound** — reward notifications play `coins.mp3`.
 - **Landing page** — official marketing page with hero, features, steps, testimonials and FAQ.
 
@@ -95,7 +95,8 @@ A supervision panel lets **super users** (Admin, Guard, Boss) inspect users, con
 ┌──────────────────────────┐
 │  Firebase (cloud)        │   Local (optional, fallback):
 │  users / conversations / │   Python FastAPI on :8000
-│  admins / gamification / │   - /api/transcribe (Whisper)
+│  users / organizaciones /│   Python FastAPI on :8000
+│  conversations /         │   - /api/transcribe (Whisper)
 │  notes                   │
 └──────────────────────────┘
 ```
@@ -150,7 +151,7 @@ PainHunter/
     ├── services/             # openRouterService, chatService, adminService,
     │                         # gamificationService, whisperService, chatStorage
     ├── components/           # Chat, Sidebar, GamificationBar, Messages, ...
-    ├── pages/                # LandingPage, AuthPage, SuperUserLogin, AdminPanel
+    ├── pages/                # LandingPage, AuthPage, AdminPanel
     └── App.jsx               # Main chat application
 ```
 
@@ -232,11 +233,11 @@ pain-hunter-default-rtdb (europe-west1)
 │   └── {uid}/
 │       ├── name: string
 │       ├── gender: string
-│       └── organizacion: string      # company the user belongs to
-├── admins/
-│   └── {uid}/
-│       ├── role: "ADMIN" | "VIGILANTE" | "BOSS"
-│       └── organizacion: string      # company the admin supervises
+│       ├── organizacion: string      # company the user belongs to
+│       └── role: "empleado" | "lider" # role within the organization
+├── organizaciones/
+│   └── {orgKey}/
+│       └── lideres: number            # 0-2 leaders per organization
 ├── conversations/
 │   └── {uid}/
 │       └── {chatId}/
@@ -258,20 +259,22 @@ pain-hunter-default-rtdb (europe-west1)
 **Security rules (summary)**
 
 - Regular users can only read/write their own `conversations/{uid}` and `gamification/{uid}` nodes.
-- Users with a role in `admins/{uid}` can read `users`, `conversations`, `gamification` and `admins`.
-- Each admin only monitors employees from **their own organization**: the panel filters `users` and `conversations` by `organizacion`.
+- Users with `role: "lider"` in `users/{uid}` can read `users`, `conversations` and `gamification`.
+- Each leader only monitors employees from **their own organization**: the panel filters `users` and `conversations` by `organizacion`.
+- `organizaciones/{orgKey}/lideres` can only hold a value between 0 and 2 (DB validation rule).
 
 ---
 
-## Roles & Super Users
+## Roles
 
 | Role | Permissions |
 |---|---|
-| **ADMIN** | Full access to the admin panel and all data |
-| **VIGILANTE** (Guard) | Can monitor conversations |
-| **BOSS** | Highest-level monitoring |
+| **empleado** (employee) | Accesses the Mr Hunter chat and their own gamification. |
+| **lider** (leader) | Accesses the admin panel and monitors users from their same organization. |
 
-Super users log in through the dedicated `/superusers` route. Public pages (landing, login) do **not** expose the super-user access link.
+- Registration asks you to choose a role: **employee** or **leader**.
+- Each organization must have **at least 1 leader and at most 2**. Registering a third leader is rejected with *"This organization already has 2 registered leaders."*
+- There is no separate access route: leaders and employees use the same login (`/login`), and the app redirects according to the account role.
 
 ---
 
@@ -290,12 +293,12 @@ Super users log in through the dedicated `/superusers` route. Public pages (land
 
 ```
    ┌─────────┐      ┌──────────────┐      ┌─────────┐      ┌──────────────┐      ┌─────────┐
-   │ Usuario │ ───► │  Mr Hunter   │ ───► │  Notas  │ ───► │  Conclusión  │ ───► │  Panel  │
-   │         │  chat│ (entrevista) │      │ (interna)│      │  y reco.    │      │(supervisor)│
+   │  Usuario  │ ───► │  Mr Hunter   │ ───► │  Notas  │ ───► │  Conclusión  │ ───► │  Panel  │
+   │           │  chat│ (entrevista) │      │ (interna)│      │  y reco.    │      │ (líder) │
    └─────────┘      └──────────────┘      └─────────┘      └──────────────┘      └─────────┘
 ```
 
-An employee talks to Mr Hunter → the AI detects obstacles and saves improvement notes → a conclusion and recommendation are generated → the supervision panel reviews everything.
+An employee talks to Mr Hunter → the AI detects obstacles and saves improvement notes → a conclusion and recommendation are generated → the organization's leader reviews everything in the panel.
 
 ---
 

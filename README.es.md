@@ -34,7 +34,7 @@
   - [4. Compilar para producción](#4-compilar-para-producción)
 - [Gamificación](#gamificación)
 - [Estructura de la base de datos (Firebase Realtime Database)](#estructura-de-la-base-de-datos-firebase-realtime-database)
-- [Roles y superusuarios](#roles-y-superusuarios)
+- [Roles](#roles)
 - [Cómo funciona la entrevista con IA](#cómo-funciona-la-entrevista-con-ia)
 - [Casos de uso reales](#casos-de-uso-reales)
 - [Limitaciones actuales](#limitaciones-actuales)
@@ -51,12 +51,12 @@
 **PainHunter** es una plataforma de clima laboral. Un empleado crea su cuenta, tiene una entrevista con **Mr Hunter** y, después de cada conversación, la IA:
 
 1. Detecta obstáculos concretos: procesos lentos, herramientas o licencias faltantes, carga de trabajo, fricciones entre áreas.
-2. Extrae **notas de mejora** (internas, visibles solo para el panel de supervisión).
+2. Extrae **notas de mejora** (internas, visibles solo para el panel de administración).
 3. Genera una **conclusión** y una **recomendación** accionable para el líder del equipo.
 
 Los empleados ganan **puntos y trofeos** por cada mensaje y cada conversación, manteniéndolos motivados a participar en la entrevista.
 
-Un panel de supervisión permite a los **superusuarios** (Admin, Vigilante, Jefe) inspeccionar usuarios, conversaciones y diagnósticos generados por la IA.
+Un panel de administración permite a los **líderes** de cada organización inspeccionar los usuarios, conversaciones y diagnósticos generados por la IA de su propia empresa.
 
 > El chat corre en la nube a través de **OpenRouter** con modelos gratuitos. No se requiere ningún modelo local.
 
@@ -69,11 +69,11 @@ Un panel de supervisión permite a los **superusuarios** (Admin, Vigilante, Jefe
 - **Transcripción por voz** — los audios se transcriben en el navegador con `transformers.js` (Whisper), con servidor local FastAPI como respaldo.
 - **Notas de mejora automáticas** — el modelo emite notas estructuradas (`###NOTAS###`), ocultas del chat en streaming y guardadas para el panel.
 - **Detección de obstáculos** — flag `es_dolor` por decisión de la IA más coincidencia de palabras clave.
-- **Conclusión y recomendación de la IA** — generadas al final de cada conversación para el panel de supervisión.
+- **Conclusión y recomendación de la IA** — generadas al final de cada conversación para el panel de administración.
 - **Gamificación** — XP, huellas, niveles, rachas y 12 trofeos por conversación.
 - **Autenticación** — Firebase Auth (correo/contraseña) con registro.
-- **Base de datos en tiempo real** — usuarios, conversaciones, gamificación y roles de admin en Firebase RTDB.
-- **Panel de superusuarios** — roles Admin, Vigilante y Jefe con estadísticas e inspección de conversaciones.
+- **Base de datos en tiempo real** — usuarios, conversaciones, gamificación y roles en Firebase RTDB.
+- **Panel de líderes** — el rol **Líder** accede al panel con estadísticas e inspección de las conversaciones de su organización.
 - **Notificaciones con sonido** — las recompensas muestran un toast y reproducen `coins.mp3`.
 - **Landing page** — página de marketing con hero, características, pasos, testimonios y FAQ.
 
@@ -95,7 +95,8 @@ Un panel de supervisión permite a los **superusuarios** (Admin, Vigilante, Jefe
 ┌──────────────────────────┐
 │  Firebase (nube)         │   Local (opcional, respaldo):
 │  users / conversations / │   Python FastAPI en :8000
-│  admins / gamification / │   - /api/transcribe (Whisper)
+│  users / organizaciones / │   Python FastAPI en :8000
+│  conversations /          │   - /api/transcribe (Whisper)
 │  notas                   │
 └──────────────────────────┘
 ```
@@ -150,7 +151,7 @@ PainHunter/
     ├── services/             # openRouterService, chatService, adminService,
     │                         # gamificationService, whisperService, chatStorage
     ├── components/           # Chat, Sidebar, GamificationBar, Messages, ...
-    ├── pages/                # LandingPage, AuthPage, SuperUserLogin, AdminPanel
+    ├── pages/                # LandingPage, AuthPage, AdminPanel
     └── App.jsx               # Aplicación principal de chat
 ```
 
@@ -232,11 +233,11 @@ pain-hunter-default-rtdb (europe-west1)
 │   └── {uid}/
 │       ├── name: string
 │       ├── gender: string
-│       └── organizacion: string      # empresa a la que pertenece
-├── admins/
-│   └── {uid}/
-│       ├── role: "ADMIN" | "VIGILANTE" | "BOSS"
-│       └── organizacion: string      # empresa que supervisa
+│       ├── organizacion: string      # empresa a la que pertenece
+│       └── role: "empleado" | "lider" # rol dentro de la organización
+├── organizaciones/
+│   └── {orgKey}/
+│       └── lideres: number            # 0-2 líderes por organización
 ├── conversations/
 │   └── {uid}/
 │       └── {chatId}/
@@ -258,20 +259,22 @@ pain-hunter-default-rtdb (europe-west1)
 **Reglas de seguridad (resumen)**
 
 - Los usuarios comunes solo pueden leer/escribir sus propios nodos `conversations/{uid}` y `gamification/{uid}`.
-- Los usuarios con rol en `admins/{uid}` pueden leer `users`, `conversations`, `gamification` y `admins`.
-- Cada admin solo monitorea a los empleados de **su misma organización**: el panel filtra `users` y `conversations` por `organizacion`.
+- Los usuarios con `role: "lider"` en `users/{uid}` pueden leer `users`, `conversations` y `gamification`.
+- Cada líder solo monitorea a los empleados de **su misma organización**: el panel filtra `users` y `conversations` por `organizacion`.
+- `organizaciones/{orgKey}/lideres` solo puede valer entre 0 y 2 (regla de validación en la BD).
 
 ---
 
-## Roles y superusuarios
+## Roles
 
 | Rol | Permisos |
 |---|---|
-| **ADMIN** | Acceso completo al panel y a todos los datos |
-| **VIGILANTE** | Puede monitorear conversaciones |
-| **BOSS** | Monitoreo de nivel superior |
+| **empleado** | Accede al chat con Mr Hunter y a su propia gamificación. |
+| **lider** | Accede al panel de administración y monitorea los usuarios de su misma organización. |
 
-Los superusuarios inician sesión por la ruta dedicada `/superusers`. Las páginas públicas (landing, login) **no** exponen el enlace de acceso de superusuarios.
+- El registro pide elegir el rol: **empleado** o **líder**.
+- Cada organización debe tener **mínimo 1 líder y máximo 2**. El alta de un tercer líder se rechaza con el mensaje *"Esta organización ya tiene 2 líderes registrados."*
+- No existe una ruta de acceso aparte: líderes y empleados usan el mismo login (`/login`), y la app redirige según el rol de la cuenta.
 
 ---
 
@@ -291,11 +294,11 @@ Los superusuarios inician sesión por la ruta dedicada `/superusers`. Las págin
 ```
    ┌─────────┐      ┌──────────────┐      ┌─────────┐      ┌──────────────┐      ┌─────────┐
    │ Usuario │ ───► │  Mr Hunter   │ ───► │  Notas  │ ───► │  Conclusión  │ ───► │  Panel  │
-   │         │  chat│ (entrevista) │      │ (interna)│      │  y reco.    │      │(supervisor)│
+   │         │  chat│ (entrevista) │      │ (interna)│      │  y reco.    │      │ (líder) │
    └─────────┘      └──────────────┘      └─────────┘      └──────────────┘      └─────────┘
 ```
 
-Un empleado habla con Mr Hunter → la IA detecta obstáculos y guarda notas de mejora → se genera una conclusión y una recomendación → el panel de supervisión lo revisa todo.
+Un empleado habla con Mr Hunter → la IA detecta obstáculos y guarda notas de mejora → se genera una conclusión y una recomendación → el líder de la organización lo revisa en el panel.
 
 ---
 
