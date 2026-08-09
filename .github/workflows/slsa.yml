@@ -1,0 +1,51 @@
+name: SLSA Generic Generator
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Create tarball
+        run: tar --dereference --hard-dereference -czf painhunter-dist.tar.gz dist
+
+      - name: Generate provenance
+        id: build
+        uses: slsa-framework/slsa-github-generator/actions/upload-artifact@v2.1.0
+        with:
+          name: painhunter-artifacts
+          path: painhunter-dist.tar.gz
+          compression-level: 9
+
+  provenance:
+    needs: [build]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: '${{ needs.build.outputs.digest }}'
+      upload-assets: true
