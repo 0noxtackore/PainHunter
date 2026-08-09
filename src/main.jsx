@@ -12,8 +12,8 @@ import './index.css';
 
 function LoadingScreen() {
   return (
-    <div className="flex h-screen items-center justify-center bg-slate-50">
-      <img src="/img/logo_sidebar.png" alt="PainHunter" className="h-10 w-auto animate-pulse" />
+    <div className="flex h-screen items-center justify-center overflow-hidden bg-slate-50">
+      <img src="/img/logo_loading.png" alt="PainHunter" className="h-28 w-auto animate-logo-pulse" />
     </div>
   );
 }
@@ -21,11 +21,7 @@ function LoadingScreen() {
 function AdminLoadingScreen() {
   return (
     <div className="flex h-screen items-center justify-center overflow-hidden bg-slate-50">
-      <img
-        src="/img/logo_loading.png"
-        alt="PainHunter"
-        className="animate-logo-pulse max-h-[80vh] max-w-[80vw] object-contain"
-      />
+      <img src="/img/logo_loading.png" alt="PainHunter" className="h-40 w-auto animate-logo-pulse" />
     </div>
   );
 }
