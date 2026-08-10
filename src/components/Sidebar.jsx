@@ -146,7 +146,7 @@ export default function Sidebar({
 
       <div className="border-t border-white/10 p-4">
         {user?.email && (
-          <p className="mb-2 truncate text-xs text-white/60" title={`${user.email} | ${user.displayName || ''}`}>
+          <p className="mb-2 truncate text-center text-xs text-white/60" title={`${user.email} | ${user.displayName || ''}`}>
             {user.email}
             {user.displayName ? ` | ${user.displayName}` : ''}
           </p>
