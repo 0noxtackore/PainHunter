@@ -28,7 +28,7 @@ function createMessage(role, content, streaming = false) {
 }
 
 export function useChat() {
-  const { user } = useAuth();
+  const { user, organizacion } = useAuth();
   const uid = user?.uid;
   const userName = user?.displayName || '';
 
@@ -246,11 +246,12 @@ export function useChat() {
               rewardConversation(conversationId, { notes: notes.length }).catch(() => {});
             }
           },
-          userName
+          userName,
+          organizacion
         );
         const replyText = assistantTextRef.current.trim();
         if (replyText) {
-          requestConclusion([...withUser, { role: 'assistant', content: replyText }], userName)
+          requestConclusion([...withUser, { role: 'assistant', content: replyText }], userName, organizacion)
             .then((result) => {
               if (result.content) {
                 setConversations((prev) =>
@@ -295,7 +296,7 @@ export function useChat() {
         setLoading(false);
       }
     },
-    [renameConversation, userName, rewardMessage, rewardConversation]
+    [renameConversation, userName, organizacion, rewardMessage, rewardConversation]
   );
 
   const activeGamification = activeId ? byConversation[activeId] || null : null;

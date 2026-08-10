@@ -54,7 +54,7 @@ function buildReply(conversation, userName) {
   return greet('gracias por compartir. Quiero entender bien tu situación para ayudarte. Cuéntame con tus palabras: ¿qué es lo que más te está complicando o frenando en tu trabajo estos días, y desde cuándo?');
 }
 
-export async function sendMessage(conversation, onToken, onNotes, userName) {
+export async function sendMessage(conversation, onToken, onNotes, userName, organizacion) {
   let receivedAny = false;
   const wrappedToken = (token) => {
     receivedAny = true;
@@ -63,7 +63,7 @@ export async function sendMessage(conversation, onToken, onNotes, userName) {
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      await streamReply(conversation, wrappedToken, onNotes, userName);
+      await streamReply(conversation, wrappedToken, onNotes, userName, organizacion);
       return;
     } catch {
       if (receivedAny) return;

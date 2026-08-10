@@ -56,21 +56,30 @@ const SYSTEM_PROMPT = [
   'sobre lo que vas a hacer. Tu mensaje es la conversacion directa, nada mas.',
 ].join('\n');
 
-function buildSystemPrompt(userName) {
+function buildSystemPrompt(userName, organizacion) {
   const name = (userName || '').trim();
-  if (!name) return SYSTEM_PROMPT;
-  return (
-    SYSTEM_PROMPT +
-    '\n\nEl usuario se llama ' +
-    name +
-    '. Usa su nombre de forma natural al saludarlo, ' +
-    'cuando le des consejo o lo motives. No abuses de la repeticion del nombre: ' +
-    'utilizalo una o dos veces por mensaje como maximo.'
-  );
+  const org = (organizacion || '').trim();
+  let prompt = SYSTEM_PROMPT;
+  if (name) {
+    prompt +=
+      '\n\nEl usuario se llama ' +
+      name +
+      '. Usa su nombre de forma natural al saludarlo, ' +
+      'cuando le des consejo o lo motives. No abuses de la repeticion del nombre: ' +
+      'utilizalo una o dos veces por mensaje como maximo.';
+  }
+  if (org) {
+    prompt +=
+      '\n\nEl usuario pertenece a la organizacion llamada "' +
+      org +
+      '". Puedes mencionar el nombre de su organizacion de forma natural al saludar o cerrar la ' +
+      'entrevista, pero no lo repitas en exceso.';
+  }
+  return prompt;
 }
 
-function buildMessages(conversation, userName) {
-  const system = buildSystemPrompt(userName);
+function buildMessages(conversation, userName, organizacion) {
+  const system = buildSystemPrompt(userName, organizacion);
   const history = Array.isArray(conversation) ? conversation : [];
 
   let candidates = history;
@@ -215,7 +224,7 @@ async function fetchCompletion(messages, options = {}) {
   throw lastError || new Error('Todos los modelos fallaron');
 }
 
-export async function streamReply(conversation, onToken, onNotes, userName) {
+export async function streamReply(conversation, onToken, onNotes, userName, organizacion) {
   if (!API_KEY) {
     onToken(
       'No he podido conectarme: falta la clave de OpenRouter. Añádela como VITE_OPENROUTER_API_KEY en tu archivo .env.'
@@ -223,7 +232,7 @@ export async function streamReply(conversation, onToken, onNotes, userName) {
     return;
   }
 
-  const messages = buildMessages(conversation, userName);
+  const messages = buildMessages(conversation, userName, organizacion);
   const models = [MODEL, ...FALLBACK_MODELS];
   let lastError = null;
 
@@ -348,8 +357,9 @@ export async function generateTitle(conversation) {
   return stripReasoning(content.split('\n')[0].trim().slice(0, 60));
 }
 
-export async function generateConclusion(conversation, userName) {
+export async function generateConclusion(conversation, userName, organizacion) {
   const name = (userName || '').trim();
+  const org = (organizacion || '').trim();
   const lines = (conversation || [])
     .map((message) => {
       const content = (message.content || '').trim();
@@ -368,7 +378,8 @@ export async function generateConclusion(conversation, userName) {
     'recomendacion practica y accionable de maximo 2 frases, orientada a mejorar su trabajo o resolver el obstaculo). ' +
     'NO escribas dialogo ni te dirijas al usuario directamente.\n\n';
   const withName = name ? `El usuario se llama ${name}.\n\n` : '';
-  const finalPrompt = prompt + withName + `Conversacion:\n${text}\n\nJSON:`;
+  const withOrg = org ? `El usuario pertenece a la organizacion "${org}".\n\n` : '';
+  const finalPrompt = prompt + withName + withOrg + `Conversacion:\n${text}\n\nJSON:`;
 
   const raw = await fetchCompletion([{ role: 'user', content: finalPrompt }], {
     temperature: 0.3,
