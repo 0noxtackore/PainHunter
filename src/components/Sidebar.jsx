@@ -152,8 +152,8 @@ export default function Sidebar({
           </p>
         )}
         {organizacion && (
-          <p className="mb-2 truncate text-xs font-medium text-brand-200" title={`Organización: ${organizacion}`}>
-            {organizacion}
+          <p className="mb-2 truncate text-center text-xs font-medium text-brand-200" title={`Organización: ${organizacion}`}>
+            {organizacion} - {role === 'lider' ? 'Líder' : 'Empleado'}
           </p>
         )}
         {isAdmin && (
