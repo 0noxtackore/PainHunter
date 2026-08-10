@@ -15,7 +15,7 @@ export default function Sidebar({
   onClose,
   gamificationByConversation,
 }) {
-  const { user, logout, isAdmin, role } = useAuth();
+  const { user, logout, isAdmin, role, organizacion } = useAuth();
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState(null);
   const [draft, setDraft] = useState('');
@@ -149,6 +149,11 @@ export default function Sidebar({
           <p className="mb-2 truncate text-xs text-white/60" title={`${user.email} | ${user.displayName || ''}`}>
             {user.email}
             {user.displayName ? ` | ${user.displayName}` : ''}
+          </p>
+        )}
+        {organizacion && (
+          <p className="mb-2 truncate text-xs font-medium text-brand-200" title={`Organización: ${organizacion}`}>
+            {organizacion}
           </p>
         )}
         {isAdmin && (
