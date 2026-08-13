@@ -2,16 +2,20 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   Brain,
+  Briefcase,
   Building2,
   ChevronDown,
   Eye,
   Lightbulb,
+  ListChecks,
   Loader2,
   MessageSquare,
+  Network,
   NotebookPen,
   Search,
   Shield,
   Users,
+  Wrench,
   X,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -42,6 +46,27 @@ function formatDate(ts) {
   } catch {
     return '';
   }
+}
+
+function buildRoleDoc(chats) {
+  const doc = { resumenes: [], tareas: [], herramientas: [], interacciones: [] };
+  const pushUnique = (arr, value) => {
+    const text = String(value || '').trim();
+    if (text && !arr.some((item) => item.toLowerCase() === text.toLowerCase())) arr.push(text);
+  };
+  (Array.isArray(chats) ? chats : []).forEach((chat) => {
+    if (chat.resumenRol) pushUnique(doc.resumenes, chat.resumenRol);
+    (Array.isArray(chat.tareasPrincipales) ? chat.tareasPrincipales : []).forEach((value) =>
+      pushUnique(doc.tareas, value)
+    );
+    (Array.isArray(chat.herramientas) ? chat.herramientas : []).forEach((value) =>
+      pushUnique(doc.herramientas, value)
+    );
+    (Array.isArray(chat.interacciones) ? chat.interacciones : []).forEach((value) =>
+      pushUnique(doc.interacciones, value)
+    );
+  });
+  return doc;
 }
 
 export default function AdminPanel() {
@@ -209,6 +234,12 @@ export default function AdminPanel() {
               const hasNotas = chats.some(
                 (c) => (Array.isArray(c.notas) && c.notas.length > 0) || c.esDolor
               );
+              const roleDoc = buildRoleDoc(chats);
+              const hasRoleDoc =
+                roleDoc.resumenes.length > 0 ||
+                roleDoc.tareas.length > 0 ||
+                roleDoc.herramientas.length > 0 ||
+                roleDoc.interacciones.length > 0;
               const isOpen = expandedUser === profile.uid;
 
               return (
@@ -240,8 +271,14 @@ export default function AdminPanel() {
                       {firstName(profile.name || profile.email || '?').charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">
+                      <p className="flex items-center gap-2 truncate text-sm font-semibold">
                         {profile.name || 'Sin nombre'}
+                        {profile.cargo && (
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700 ring-1 ring-inset ring-brand-200">
+                            <Briefcase className="h-3 w-3" />
+                            {profile.cargo}
+                          </span>
+                        )}
                       </p>
                       <p className="truncate text-xs text-slate-500">{profile.email}</p>
                     </div>
@@ -269,6 +306,74 @@ export default function AdminPanel() {
 
                   {isOpen && (
                     <div className="border-t border-slate-100 bg-slate-50/40">
+                      {hasRoleDoc && (
+                        <div className="border-b border-slate-100 bg-white px-4 py-3">
+                          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-700">
+                            <Briefcase className="h-3.5 w-3.5" />
+                            Documentación de rol
+                          </p>
+                          {roleDoc.resumenes.length > 0 && (
+                            <p className="mb-2 text-sm leading-relaxed text-slate-700">
+                              {roleDoc.resumenes[roleDoc.resumenes.length - 1]}
+                            </p>
+                          )}
+                          {roleDoc.tareas.length > 0 && (
+                            <div className="mb-2">
+                              <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                <ListChecks className="h-3.5 w-3.5" />
+                                Tareas principales
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {roleDoc.tareas.map((item) => (
+                                  <span
+                                    key={item}
+                                    className="rounded-full bg-brand-50 px-2.5 py-1 text-xs text-brand-800 ring-1 ring-inset ring-brand-200"
+                                  >
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {roleDoc.herramientas.length > 0 && (
+                            <div className="mb-2">
+                              <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                <Wrench className="h-3.5 w-3.5" />
+                                Herramientas
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {roleDoc.herramientas.map((item) => (
+                                  <span
+                                    key={item}
+                                    className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700 ring-1 ring-inset ring-slate-200"
+                                  >
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {roleDoc.interacciones.length > 0 && (
+                            <div>
+                              <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                <Network className="h-3.5 w-3.5" />
+                                Colabora con
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {roleDoc.interacciones.map((item) => (
+                                  <span
+                                    key={item}
+                                    className="rounded-full bg-sky-50 px-2.5 py-1 text-xs text-sky-800 ring-1 ring-inset ring-sky-200"
+                                  >
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {chats.length === 0 ? (
                         <p className="px-4 py-5 text-center text-sm text-slate-400">
                           Sin conversaciones aún.

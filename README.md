@@ -51,8 +51,9 @@
 **PainHunter** is a workplace-climate platform. An employee creates an account, has an interview with **Mr Hunter**, and after every conversation the AI:
 
 1. Detects concrete obstacles: slow processes, missing tools or licenses, workload, friction between teams.
-2. Extracts **improvement notes** (internal, visible only to the admin panel).
-3. Generates a **conclusion** and an actionable **recommendation** for the team lead.
+2. **Documents the employee's role**: position, main tasks, tools they use and the areas they interact with, so leaders know what each person actually does.
+3. Extracts **improvement notes** (internal, visible only to the admin panel).
+4. Generates a **conclusion** and an actionable **recommendation** for the team lead.
 
 Employees earn **points and trophies** per message and per conversation, keeping them engaged with the interview process.
 
@@ -64,7 +65,8 @@ An admin panel lets the **leaders** of each organization inspect the users, conv
 
 ## Features
 
-- **Workplace interview with Mr Hunter** — an empathetic interviewer that asks one open question at a time about tools, processes, workload and communication.
+- **Workplace interview with Mr Hunter** — an empathetic interviewer that asks one open question at a time about tools, processes, workload, communication **and the employee's own role**.
+- **Role documentation** — Mr Hunter also asks about the position, main tasks, tools and areas each employee interacts with; the leader panel shows this per employee.
 - **Cloud AI (OpenRouter)** — free models with automatic fallback if the primary model is unavailable.
 - **Voice transcription** — audio messages transcribed in-browser with `transformers.js` (Whisper), with a local FastAPI server as fallback.
 - **Automatic improvement notes** — the model emits structured notes (`###NOTAS###`), hidden from the streaming chat and stored for the panel.
@@ -234,6 +236,7 @@ pain-hunter-default-rtdb (europe-west1)
 │       ├── name: string
 │       ├── gender: string
 │       ├── organizacion: string      # company the user belongs to
+│       ├── cargo: string             # job title / position (optional)
 │       └── role: "empleado" | "lider" # role within the organization
 ├── organizaciones/
 │   └── {orgKey}/
@@ -245,6 +248,10 @@ pain-hunter-default-rtdb (europe-west1)
 │           ├── messages: [...]
 │           ├── notas: [...]            # improvement notes (panel only)
 │           ├── conclusion: string
+│           ├── resumenRol: string              # summary of the employee's role (panel only)
+│           ├── tareasPrincipales: [...]        # main tasks (panel only)
+│           ├── herramientas: [...]             # tools / software used (panel only)
+│           ├── interacciones: [...]            # areas / roles they collaborate with (panel only)
 │           ├── es_dolor: boolean
 │           ├── recomendacion: string
 │           ├── createdAt / updatedAt
@@ -281,10 +288,11 @@ pain-hunter-default-rtdb (europe-west1)
 ## How the AI Interview Works
 
 1. The user starts an interview with Mr Hunter.
-2. Mr Hunter follows a structured method: **opening → exploration → deepening (5 Whys) → motivation → closing**, always in Spanish, 1–3 sentences, one question at a time.
+2. Mr Hunter follows a structured method: **opening → exploration → deepening (5 Whys) → motivation → closing**, always in Spanish, 1–3 sentences, one question at a time. During the exploration he also asks about the employee's **role** (position, main tasks, tools, areas they interact with).
 3. When the user shares important details, the model appends `###NOTAS###` followed by a JSON list. The stream parser hides everything after the marker from the chat and saves the notes for the panel.
 4. The conclusion endpoint analyzes the messages and returns:
    - **conclusion** — a short summary of the employee's situation,
+   - **resumen_rol, tareas_principales, herramientas, interacciones** — the role documentation extracted from the conversation,
    - **es_dolor** — `true` if a real work obstacle was described (AI decision or keyword match),
    - **recomendacion** — an actionable recommendation.
 5. The AI is instructed to **never** mention internal notes, observations or registries to the employee — it only talks about the interview and the points earned.

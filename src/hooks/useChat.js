@@ -104,6 +104,10 @@ export function useChat() {
       conclusion: conversation.conclusion || '',
       esDolor: conversation.esDolor || false,
       recomendacion: conversation.recomendacion || '',
+      resumenRol: conversation.resumenRol || '',
+      tareasPrincipales: conversation.tareasPrincipales || [],
+      herramientas: conversation.herramientas || [],
+      interacciones: conversation.interacciones || [],
     });
   };
 
@@ -262,6 +266,10 @@ export function useChat() {
                           conclusion: result.content,
                           esDolor: Boolean(result.esDolor),
                           recomendacion: result.recomendacion,
+                          resumenRol: result.resumenRol || '',
+                          tareasPrincipales: result.tareasPrincipales || [],
+                          herramientas: result.herramientas || [],
+                          interacciones: result.interacciones || [],
                         }
                       : c
                   )

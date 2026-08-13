@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Briefcase,
   Building2,
   Eye,
   EyeOff,
@@ -51,6 +52,7 @@ export default function AuthPage({ mode }) {
   const [name, setName] = useState('');
   const [gender, setGender] = useState('');
   const [organizacion, setOrganizacion] = useState('');
+  const [cargo, setCargo] = useState('');
   const [role, setRole] = useState('empleado');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -81,7 +83,7 @@ export default function AuthPage({ mode }) {
     setBusy(true);
     try {
       if (isRegister) {
-        await signup(name.trim(), email.trim(), password, gender, organizacion, role);
+        await signup(name.trim(), email.trim(), password, gender, organizacion, role, cargo);
         navigate(role === 'lider' ? '/admin' : '/chat');
         return;
       }
@@ -230,6 +232,22 @@ export default function AuthPage({ mode }) {
                       onChange={(event) => setOrganizacion(event.target.value)}
                       placeholder="Nombre de tu empresa"
                       required
+                      className={inputClass}
+                    />
+                  </div>
+                </Field>
+              )}
+
+              {isRegister && role === 'empleado' && (
+                <Field label="Cargo / Puesto (opcional)">
+                  <div className="relative">
+                    <Briefcase className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      id="cargo"
+                      type="text"
+                      value={cargo}
+                      onChange={(event) => setCargo(event.target.value)}
+                      placeholder="Ej. Desarrollador, Ventas, RRHH…"
                       className={inputClass}
                     />
                   </div>

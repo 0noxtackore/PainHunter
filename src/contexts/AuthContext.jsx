@@ -54,7 +54,7 @@ export function AuthProvider({ children }) {
       isAdmin,
       initializing,
       login: (email, password) => signInWithEmailAndPassword(auth, email, password),
-      signup: async (name, email, password, gender, organizacion = '', role = 'empleado') => {
+      signup: async (name, email, password, gender, organizacion = '', role = 'empleado', cargo = '') => {
         const credentials = await createUserWithEmailAndPassword(auth, email, password);
         try {
           await updateProfile(credentials.user, { displayName: name });
@@ -73,6 +73,7 @@ export function AuthProvider({ children }) {
                 gender: gender || 'otro',
                 organizacion: org,
                 role: 'lider',
+                cargo: cargo || '',
               },
               [`organizaciones/${orgKey}/lideres`]: current + 1,
             });
@@ -82,6 +83,7 @@ export function AuthProvider({ children }) {
               gender: gender || 'otro',
               organizacion: (organizacion || '').trim(),
               role: 'empleado',
+              cargo: cargo || '',
             });
           }
           return credentials;

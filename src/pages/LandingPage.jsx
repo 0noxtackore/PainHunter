@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Sparkles,
   User,
+  UserCheck,
   UserPlus,
   X,
 } from 'lucide-react';
@@ -22,9 +23,14 @@ import { useReveal } from '../hooks/useReveal';
 
 const FEATURES = [
   {
+    icon: UserCheck,
+    title: 'Conoce tu rol',
+    text: 'Mr Hunter quiere entender qué haces: tu cargo, tus tareas principales y las herramientas que usas cada día, para conocer bien tu trabajo.',
+  },
+  {
     icon: MessageCircle,
     title: 'Conversa con Mr Hunter',
-    text: 'Un entrevistador de clima laboral que te pregunta por tu día a día, detecta los obstáculos y te hace ganar puntos por compartirlos.',
+    text: 'Un entrevistador laboral que te pregunta por tu cargo y tu día a día, detecta los obstáculos que te frenan y te hace ganar puntos por compartirlo.',
   },
   {
     icon: Activity,
@@ -64,7 +70,7 @@ const STEPS = [
     n: '02',
     icon: MessageCircle,
     title: 'Conversa con Mr Hunter',
-    text: 'Cuéntale cómo es tu día a día laboral. Él te hará preguntas para entender tus obstáculos y oportunidades de mejora.',
+    text: 'Cuéntale tu cargo, tus tareas y cómo es tu día a día laboral. Él te hará preguntas para conocer tu rol y entender los obstáculos y oportunidades de mejora.',
   },
   {
     n: '03',
@@ -78,24 +84,28 @@ const TESTIMONIALS = [
   {
     name: 'Ana M.',
     role: 'Empleada del área de operaciones',
-    text: 'Me sorprende cómo Mr Hunter detecta los cuellos de botella de mi equipo sin que yo los detalle mucho. Se siente como una conversación real.',
+    text: 'Mr Hunter me preguntó por mi cargo y mis tareas y además detectó los cuellos de botella de mi equipo sin que yo los detalle mucho. Se siente como una conversación real.',
   },
   {
     name: 'Carlos R.',
     role: 'Empleado del área de ventas',
-    text: 'Finalmente alguien que escucha mis problemas de herramientas. Me ayuda a darme cuenta de lo que me frena en el día a día.',
+    text: 'Al conocer mi rol en ventas, enseguida entendió qué tareas me quitan más tiempo. Por fin sentí que alguien se interesa por saber qué hago cada día.',
   },
   {
     name: 'Lucía G.',
     role: 'Empleada del área de TI',
-    text: 'Valoro muchísimo la privacidad. Saber que mi información no sale de mi dispositivo me da total confianza para hablar con franqueza.',
+    text: 'Valoro muchísimo la privacidad. Saber que mi información no sale de mi dispositivo me da total confianza para hablar con franqueza de mi trabajo.',
   },
 ];
 
 const FAQS = [
   {
     q: '¿Qué es Mr Hunter?',
-    a: 'Mr Hunter es tu entrevistador de clima laboral. Una IA que conversa contigo sobre tu día a día en el trabajo, detecta obstáculos, procesos pesados y fricciones, y te hace ganar puntos y reconocimientos por compartir tus experiencias.',
+    a: 'Mr Hunter es tu entrevistador laboral. Una IA que conversa contigo para conocerte de verdad: primero quiere saber qué haces en tu trabajo (tu cargo, tus tareas y las herramientas que usas) y luego detecta obstáculos, procesos pesados y fricciones. Por compartir tu experiencia ganas puntos y reconocimientos.',
+  },
+  {
+    q: '¿Por qué me pregunta por mi cargo y mis tareas?',
+    a: 'Para entender mejor tu trabajo y darte soluciones que se ajusten a lo que realmente haces. Mr Hunter documenta tu rol con naturalidad, sin que se convierta en un formulario, para conocer qué hace cada persona del equipo.',
   },
   {
     q: '¿Mis datos son privados?',
@@ -107,7 +117,7 @@ const FAQS = [
   },
   {
     q: '¿Cómo gano puntos?',
-    a: 'Cada conversación con Mr Hunter te suma puntos por participar y por compartir tus experiencias laborales. Acumulas recompensas que reconocen tu constancia y tus aportes al mejorar el clima del equipo.',
+    a: 'Cada conversación con Mr Hunter te suma puntos por participar y por compartir tu rol y tus experiencias laborales. Acumulas recompensas que reconocen tu constancia y tus aportes al mejorar el clima del equipo.',
   },
 ];
 
@@ -239,12 +249,13 @@ export default function LandingPage() {
               <span className="bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent">
                 cazador de dolores
               </span>{' '}
-              del equipo
+              y conocedor de tu rol
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600 lg:text-lg">
-              Una plataforma de entrevista laboral que conversa contigo sobre tu día a día en el
-              trabajo, detecta los obstáculos que te frenan y te recompensa por compartir tus
-              experiencias y aportar al clima del equipo.
+              Una plataforma de entrevista laboral que conversa contigo para conocerte de verdad:
+              quiere saber qué haces, cuál es tu cargo, qué tareas realizas y qué herramientas usas,
+              además de detectar los obstáculos que te frenan. Te recompensa por compartir tu
+              experiencia y aportar al clima del equipo.
             </p>
             <div className="mt-8 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center">
               <Link
@@ -301,13 +312,13 @@ export default function LandingPage() {
               </div>
               <div className="space-y-3 px-5 py-6">
                 <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-2.5 text-sm text-slate-700">
-                  Hola, soy Mr Hunter. ¿Qué es lo que más te frena en tu trabajo esta semana?
+                  Hola, soy Mr Hunter. Para empezar, cuéntame: ¿cuál es tu cargo y cuáles son tus tareas principales?
                 </div>
                 <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-md bg-gradient-to-br from-brand-700 to-brand-500 px-4 py-2.5 text-sm text-white shadow-md shadow-brand-700/20">
-                  Me faltan licencias de un software y las aprobaciones tardan días.
+                  Soy de RRHH: gestiono altas de personal, nómina y reportes para dirección.
                 </div>
                 <div className="max-w-[85%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-2.5 text-sm text-slate-700">
-                  Entiendo. Gracias por compartirlo, ganaste puntos por tu aporte.
+                  Gracias, así conozco mejor tu rol. Ahora dime: ¿qué es lo que más te frena en esas tareas esta semana?
                 </div>
                 <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3">
                   <span className="typing-dot h-2 w-2 rounded-full bg-brand-500" />
@@ -512,8 +523,8 @@ export default function LandingPage() {
               Empieza a mejorar tu trabajo hoy
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-white/85">
-              Regístrate gratis y comienza a conversar con Mr Hunter. Tu privacidad está protegida
-              en todo momento.
+              Regístrate gratis y conversa con Mr Hunter sobre tu trabajo: cuéntale qué haces y
+              qué te frena. Tu privacidad está protegida en todo momento.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
@@ -557,8 +568,8 @@ export default function LandingPage() {
                 <img src="/img/logo.png" alt="PainHunter" className="h-10 w-auto" />
               </div>
               <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-500">
-                PainHunter · Mr Hunter, tu entrevistador de clima laboral. Conversa, detecta los
-                obstáculos del equipo y mejora el trabajo con una IA local y privada.
+                PainHunter · Mr Hunter, tu entrevistador laboral. Conoce tu cargo y tus tareas,
+                detecta los obstáculos del equipo y mejora el trabajo con una IA local y privada.
               </p>
             </div>
             <div>

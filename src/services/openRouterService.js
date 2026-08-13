@@ -18,8 +18,12 @@ const SYSTEM_PROMPT = [
   '   b) procesos que se sientan lentos, confusos o con cuellos de botella (aprobaciones, comunicacion entre areas);',
   '   c) carga de trabajo y como se reparte entre el equipo o con su jefe;',
   '   d) problemas de comunicacion o colaboracion con companeros, jefes u otros departamentos;',
-  '   e) ideas propias de mejora o cosas que llevaria a su lider para trabajar mejor.',
-  '   Empieza por el tema que la persona mencione y no fuerces todos.',
+  '   e) ideas propias de mejora o cosas que llevaria a su lider para trabajar mejor;',
+  '   f) documentacion del rol: su puesto o cargo, sus responsabilidades, las 2 a 4 tareas principales,',
+  '      las herramientas o software que usa a diario y con que areas o roles de la empresa interactua.',
+  '   Empieza por el tema que la persona mencione y no fuerces todos. A lo largo de la entrevista pregunta',
+  '   tambien por su rol para documentar con naturalidad que hace en su trabajo, sin convertir la charla',
+  '   en un formulario: integra estas preguntas con curiosidad genuina.',
   '3) Profundizacion: usa la tecnica de los 5 porque: ante cada obstaculo, pregunta que le causa, que le',
   'impide, desde cuando ocurre y como le afecta en su dia a dia.',
   '4) Motivacion: reconoce su esfuerzo y coméntale que por participar sumara puntos y recompensas.',
@@ -44,11 +48,11 @@ const SYSTEM_PROMPT = [
   '\n\nNOTAS:',
   'Al final de tu mensaje, si el usuario compartio algo importante que valga la pena recordar',
   '(un obstaculo concreto, un proceso que falla, una herramienta que falta, un problema de',
-  'comunicacion o una idea de mejora), agrega exactamente esta linea final: ###NOTAS### y despues',
-  'una lista JSON de frases cortas, ejemplo:',
+  'comunicacion, una idea de mejora o datos de su rol como puesto, tareas o herramientas),',
+  'agrega exactamente esta linea final: ###NOTAS### y despues una lista JSON de frases cortas, ejemplo:',
   'Tu respuesta aqui. ###NOTAS### ["Falta licencia de software para X", "Cuello de botella en aprobaciones"].',
   'Es obligatorio agregar ###NOTAS### siempre que el usuario mencione datos concretos de procesos,',
-  'herramientas, tiempos, areas o nombres. Si no hay nada relevante, no lo agregues.',
+  'herramientas, tiempos, areas, nombres o de su propio rol. Si no hay nada relevante, no lo agregues.',
   '\n\nRESPUESTA DIRECTA:',
   'Responde DIRECTAMENTE con tu mensaje para el usuario. JAMAS muestres tu razonamiento interno,',
   'JAMAS analices las instrucciones en voz alta, JAMAS empieces con frases como "We need to",',
@@ -370,12 +374,17 @@ export async function generateConclusion(conversation, userName, organizacion) {
   const text = lines.join('\n').slice(-3000);
 
   const prompt =
-    'Basandote en la siguiente conversacion de entrevista laboral, responde en espanol con un JSON valido y SIN " \n' +
-    'texto adicional, con exactamente estas tres claves: "conclusion" (maximo 2 frases resumiendo ' +
-    'la situacion del empleado en el trabajo: obstaculos, procesos, herramientas o clima que haya mencionado), ' +
+    'Basandote en la siguiente conversacion de entrevista laboral, responde en espanol con un JSON valido y SIN ' +
+    'texto adicional, con exactamente estas siete claves: "conclusion" (maximo 2 frases resumiendo la ' +
+    'situacion del empleado en el trabajo: obstaculos, procesos, herramientas o clima que haya mencionado), ' +
     '"es_dolor" (true si la persona describio un problema real que afecte su trabajo o bienestar laboral y que ' +
-    'merezca registrarse como nota; false en caso contrario) y "recomendacion" (una unica ' +
-    'recomendacion practica y accionable de maximo 2 frases, orientada a mejorar su trabajo o resolver el obstaculo). ' +
+    'merezca registrarse como nota; false en caso contrario), "recomendacion" (una unica recomendacion ' +
+    'practica y accionable de maximo 2 frases, orientada a mejorar su trabajo o resolver el obstaculo), ' +
+    '"resumen_rol" (maximo 2 frases resumiendo el puesto y las responsabilidades del empleado segun lo que haya ' +
+    'contado; usa "" si no compartio nada al respecto), "tareas_principales" (lista de texto con las 2 a 4 ' +
+    'tareas principales que realiza; lista vacia si no las menciono), "herramientas" (lista de herramientas, ' +
+    'software o equipos que usa en su trabajo; lista vacia si no menciono ninguna) e "interacciones" (lista de ' +
+    'areas, departamentos o roles con los que colabora; lista vacia si no menciono ninguna). ' +
     'NO escribas dialogo ni te dirijas al usuario directamente.\n\n';
   const withName = name ? `El usuario se llama ${name}.\n\n` : '';
   const withOrg = org ? `El usuario pertenece a la organizacion "${org}".\n\n` : '';
@@ -388,15 +397,23 @@ export async function generateConclusion(conversation, userName, organizacion) {
   });
 
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
-  let result = { conclusion: '', es_dolor: false, recomendacion: '' };
+  let result = {
+    conclusion: '',
+    es_dolor: false,
+    recomendacion: '',
+    resumen_rol: '',
+    tareas_principales: [],
+    herramientas: [],
+    interacciones: [],
+  };
   if (jsonMatch) {
     try {
-      result = JSON.parse(jsonMatch[0]);
+      result = { ...result, ...JSON.parse(jsonMatch[0]) };
     } catch {
-      result = { conclusion: raw, es_dolor: false, recomendacion: '' };
+      result = { ...result, conclusion: raw };
     }
   } else {
-    result = { conclusion: raw, es_dolor: false, recomendacion: '' };
+    result = { ...result, conclusion: raw };
   }
 
   const conclusion = String(result.conclusion || '')
@@ -418,9 +435,32 @@ export async function generateConclusion(conversation, userName, organizacion) {
     .trim()
     .slice(0, 280);
 
+  const normalizeList = (value) => {
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item ?? '').trim()).filter(Boolean);
+    }
+    if (typeof value === 'string' && value.trim()) {
+      return value
+        .split(/[;,\n]+/)
+        .map((item) => item.trim().replace(/^[-*•\d.)]+\s*/, ''))
+        .filter(Boolean);
+    }
+    return [];
+  };
+
+  const resumenRol = String(result.resumen_rol || '')
+    .replace(/^(Resumen del rol|Rol|Resumen)\s*:?\s*/i, '')
+    .replace(/"/g, '')
+    .trim()
+    .slice(0, 280);
+
   return {
     content: conclusion,
     esDolor: Boolean(result.es_dolor) || keywordMatch,
     recomendacion,
+    resumenRol,
+    tareasPrincipales: normalizeList(result.tareas_principales),
+    herramientas: normalizeList(result.herramientas),
+    interacciones: normalizeList(result.interacciones),
   };
 }
