@@ -108,6 +108,7 @@ export function useChat() {
       tareasPrincipales: conversation.tareasPrincipales || [],
       herramientas: conversation.herramientas || [],
       interacciones: conversation.interacciones || [],
+      importante: conversation.importante || false,
     });
   };
 
@@ -270,6 +271,7 @@ export function useChat() {
                           tareasPrincipales: result.tareasPrincipales || [],
                           herramientas: result.herramientas || [],
                           interacciones: result.interacciones || [],
+                          importante: Boolean(result.importante),
                         }
                       : c
                   )

@@ -69,6 +69,14 @@ function buildRoleDoc(chats) {
   return doc;
 }
 
+function isImportantChat(chat) {
+  return (
+    chat.importante === true ||
+    chat.esDolor === true ||
+    (Array.isArray(chat.notas) && chat.notas.length > 0)
+  );
+}
+
 export default function AdminPanel() {
   const { user, role, organizacion, logout } = useAuth();
   const [users, setUsers] = useState([]);
@@ -79,6 +87,7 @@ export default function AdminPanel() {
   const [expandedUser, setExpandedUser] = useState(null);
   const [expandedChat, setExpandedChat] = useState(null);
   const [viewChat, setViewChat] = useState(null);
+  const [showAllChats, setShowAllChats] = useState(false);
 
   useEffect(() => subscribeAllUsers(setUsers, organizacion), [organizacion]);
   useEffect(() => subscribeAllConversations(setConversationsByUser, organizacion), [organizacion]);
@@ -248,6 +257,8 @@ export default function AdminPanel() {
                 });
               });
               const isOpen = expandedUser === profile.uid;
+              const importantChats = chats.filter(isImportantChat);
+              const visibleChats = showAllChats ? chats : importantChats;
 
               return (
                 <div
@@ -448,12 +459,46 @@ export default function AdminPanel() {
                         </section>
                       </div>
 
+                      <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-white px-4 py-2">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          Conversaciones
+                        </p>
+                        {chats.length > 0 && (
+                          <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5 text-xs font-medium">
+                            <button
+                              onClick={() => setShowAllChats(false)}
+                              className={`rounded-md px-2.5 py-1 transition ${
+                                !showAllChats
+                                  ? 'bg-white text-brand-700 shadow-sm'
+                                  : 'text-slate-500 hover:text-slate-700'
+                              }`}
+                            >
+                              Importantes ({importantChats.length})
+                            </button>
+                            <button
+                              onClick={() => setShowAllChats(true)}
+                              className={`rounded-md px-2.5 py-1 transition ${
+                                showAllChats
+                                  ? 'bg-white text-brand-700 shadow-sm'
+                                  : 'text-slate-500 hover:text-slate-700'
+                              }`}
+                            >
+                              Todas ({chats.length})
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
                       {chats.length === 0 ? (
                         <p className="px-4 py-5 text-center text-sm text-slate-400">
                           Sin conversaciones aún.
                         </p>
+                      ) : visibleChats.length === 0 ? (
+                        <p className="px-4 py-5 text-center text-sm text-slate-400">
+                          Ninguna conversación marcada como importante por la IA.
+                        </p>
                       ) : (
-                        chats.map((chat) => {
+                        visibleChats.map((chat) => {
                           const notas = Array.isArray(chat.notas) ? chat.notas : [];
                           const chatOpen = expandedChat === `${profile.uid}:${chat.id}`;
                           return (

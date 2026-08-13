@@ -403,7 +403,7 @@ export async function generateConclusion(conversation, userName, organizacion) {
 
   const prompt =
     'Basandote en la siguiente conversacion de entrevista laboral, responde en espanol con un JSON valido y SIN ' +
-    'texto adicional, con exactamente estas siete claves: "conclusion" (maximo 2 frases resumiendo la ' +
+    'texto adicional, con exactamente estas ocho claves: "conclusion" (maximo 2 frases resumiendo la ' +
     'situacion del empleado en el trabajo: obstaculos, procesos, herramientas o clima que haya mencionado), ' +
     '"es_dolor" (true si la persona describio un problema real que afecte su trabajo o bienestar laboral y que ' +
     'merezca registrarse como nota; false en caso contrario), "recomendacion" (una unica recomendacion ' +
@@ -412,7 +412,10 @@ export async function generateConclusion(conversation, userName, organizacion) {
     'contado; usa "" si no compartio nada al respecto), "tareas_principales" (lista de texto con las 2 a 4 ' +
     'tareas principales que realiza; lista vacia si no las menciono), "herramientas" (lista de herramientas, ' +
     'software o equipos que usa en su trabajo; lista vacia si no menciono ninguna) e "interacciones" (lista de ' +
-    'areas, departamentos o roles con los que colabora; lista vacia si no menciono ninguna). ' +
+    'areas, departamentos o roles con los que colabora; lista vacia si no menciono ninguna) e "importante" ' +
+    '(true SOLO si la conversacion contiene informacion valiosa para el lider: un obstaculo o problema ' +
+    'concreto, datos utiles del puesto del empleado, procesos, herramientas o fallas que merezcan revisarse; ' +
+    'false si fue una charla casual, un saludo o no aporta datos de interes). ' +
     'NO escribas dialogo ni te dirijas al usuario directamente.\n\n';
   const withName = name ? `El usuario se llama ${name}.\n\n` : '';
   const withOrg = org ? `El usuario pertenece a la organizacion "${org}".\n\n` : '';
@@ -433,6 +436,7 @@ export async function generateConclusion(conversation, userName, organizacion) {
     tareas_principales: [],
     herramientas: [],
     interacciones: [],
+    importante: false,
   };
   if (jsonMatch) {
     try {
@@ -485,6 +489,11 @@ export async function generateConclusion(conversation, userName, organizacion) {
   return {
     content: conclusion,
     esDolor: Boolean(result.es_dolor) || keywordMatch,
+    importante:
+      result.importante === true ||
+      String(result.importante || '').toLowerCase() === 'true' ||
+      Boolean(result.es_dolor) ||
+      keywordMatch,
     recomendacion,
     resumenRol,
     tareasPrincipales: normalizeList(result.tareas_principales),
