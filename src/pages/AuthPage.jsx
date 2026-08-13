@@ -28,6 +28,28 @@ function Field({ label, children }) {
   );
 }
 
+const FRIENDLY_ERRORS = {
+  'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+  'auth/wrong-password': 'Contraseña incorrecta.',
+  'auth/user-not-found': 'No existe una cuenta con ese correo.',
+  'auth/invalid-email': 'Ingresa un correo electrónico válido.',
+  'auth/too-many-requests': 'Demasiados intentos. Espera un momento e inténtalo de nuevo.',
+  'auth/email-already-in-use': 'Este correo ya está registrado. Inicia sesión.',
+  'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+  'auth/missing-password': 'Ingresa tu contraseña.',
+  'auth/user-disabled': 'Esta cuenta está deshabilitada.',
+  'auth/network-request-failed': 'Hubo un problema de conexión. Inténtalo de nuevo.',
+  'auth/operation-not-allowed': 'El acceso con correo y contraseña no está disponible.',
+};
+
+function friendlyError(error) {
+  const code = error?.code || '';
+  const raw = String(error?.message || '');
+  const cleanCode = (code || raw).replace(/^Firebase:\s*/i, '').trim();
+  const key = FRIENDLY_ERRORS[cleanCode] ? cleanCode : Object.keys(FRIENDLY_ERRORS).find((k) => raw.includes(k));
+  return FRIENDLY_ERRORS[key] || 'Algo salió mal. Inténtalo de nuevo.';
+}
+
 const BRAND_FEATURES = [
   {
     icon: HeartPulse,
@@ -93,7 +115,7 @@ export default function AuthPage({ mode }) {
       if (err?.message === 'MAX_LEADERS') {
         setError({ message: 'Esta organización ya tiene 2 líderes registrados.' });
       } else {
-        setError({ message: err?.message || 'Correo o contraseña incorrectos.' });
+        setError({ message: friendlyError(err) });
       }
     } finally {
       setBusy(false);
