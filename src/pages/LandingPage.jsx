@@ -249,7 +249,7 @@ export default function LandingPage() {
               <span className="bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent">
                 cazador de dolores
               </span>{' '}
-              y conocedor de tu rol
+              y roles
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600 lg:text-lg">
               Una plataforma de entrevista laboral que conversa contigo para conocerte de verdad:
