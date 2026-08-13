@@ -400,9 +400,14 @@ export default function AdminPanel() {
                             <p className="text-xs font-semibold uppercase tracking-wide text-red-600">
                               Observaciones
                             </p>
-                            {observaciones.length > 0 && (
+                            {observaciones.length +
+                              chats.filter((c) => c.esDolor && !(Array.isArray(c.notas) && c.notas.length > 0))
+                                .length >
+                              0 && (
                               <span className="ml-auto rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-600">
-                                {observaciones.length}
+                                {observaciones.length +
+                                  chats.filter((c) => c.esDolor && !(Array.isArray(c.notas) && c.notas.length > 0))
+                                    .length}
                               </span>
                             )}
                           </div>
