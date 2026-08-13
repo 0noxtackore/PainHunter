@@ -240,6 +240,13 @@ export default function AdminPanel() {
                 roleDoc.tareas.length > 0 ||
                 roleDoc.herramientas.length > 0 ||
                 roleDoc.interacciones.length > 0;
+              const observaciones = [];
+              chats.forEach((c) => {
+                (Array.isArray(c.notas) ? c.notas : []).forEach((n) => {
+                  const text = typeof n === 'string' ? n : n?.text;
+                  if (text) observaciones.push({ text: String(text).trim(), chat: c });
+                });
+              });
               const isOpen = expandedUser === profile.uid;
 
               return (
@@ -306,73 +313,135 @@ export default function AdminPanel() {
 
                   {isOpen && (
                     <div className="border-t border-slate-100 bg-slate-50/40">
-                      {hasRoleDoc && (
-                        <div className="border-b border-slate-100 bg-white px-4 py-3">
-                          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-700">
-                            <Briefcase className="h-3.5 w-3.5" />
-                            Documentación de rol
-                          </p>
-                          {roleDoc.resumenes.length > 0 && (
-                            <p className="mb-2 text-sm leading-relaxed text-slate-700">
-                              {roleDoc.resumenes[roleDoc.resumenes.length - 1]}
+                      <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-2">
+                        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                          <div className="flex items-center gap-2 border-b border-brand-100 bg-brand-50/70 px-4 py-2.5">
+                            <Brain className="h-4 w-4 text-brand-700" />
+                            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">
+                              Información recopilada por la IA
                             </p>
-                          )}
-                          {roleDoc.tareas.length > 0 && (
-                            <div className="mb-2">
-                              <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                <ListChecks className="h-3.5 w-3.5" />
-                                Tareas principales
+                          </div>
+                          {hasRoleDoc ? (
+                            <div className="px-4 py-3">
+                              <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                <Briefcase className="h-3.5 w-3.5" />
+                                Documentación de rol
                               </p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {roleDoc.tareas.map((item) => (
-                                  <span
-                                    key={item}
-                                    className="rounded-full bg-brand-50 px-2.5 py-1 text-xs text-brand-800 ring-1 ring-inset ring-brand-200"
-                                  >
-                                    {item}
-                                  </span>
-                                ))}
-                              </div>
+                              {roleDoc.resumenes.length > 0 && (
+                                <p className="mb-2 text-sm leading-relaxed text-slate-700">
+                                  {roleDoc.resumenes[roleDoc.resumenes.length - 1]}
+                                </p>
+                              )}
+                              {roleDoc.tareas.length > 0 && (
+                                <div className="mb-2">
+                                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                    <ListChecks className="h-3.5 w-3.5" />
+                                    Tareas principales
+                                  </p>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {roleDoc.tareas.map((item) => (
+                                      <span
+                                        key={item}
+                                        className="rounded-full bg-brand-50 px-2.5 py-1 text-xs text-brand-800 ring-1 ring-inset ring-brand-200"
+                                      >
+                                        {item}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              {roleDoc.herramientas.length > 0 && (
+                                <div className="mb-2">
+                                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                    <Wrench className="h-3.5 w-3.5" />
+                                    Herramientas
+                                  </p>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {roleDoc.herramientas.map((item) => (
+                                      <span
+                                        key={item}
+                                        className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700 ring-1 ring-inset ring-slate-200"
+                                      >
+                                        {item}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              {roleDoc.interacciones.length > 0 && (
+                                <div>
+                                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                    <Network className="h-3.5 w-3.5" />
+                                    Colabora con
+                                  </p>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {roleDoc.interacciones.map((item) => (
+                                      <span
+                                        key={item}
+                                        className="rounded-full bg-sky-50 px-2.5 py-1 text-xs text-sky-800 ring-1 ring-inset ring-sky-200"
+                                      >
+                                        {item}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="px-4 py-8 text-center text-sm text-slate-400">
+                              Aún no hay información sobre el rol de este usuario en sus entrevistas.
                             </div>
                           )}
-                          {roleDoc.herramientas.length > 0 && (
-                            <div className="mb-2">
-                              <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                <Wrench className="h-3.5 w-3.5" />
-                                Herramientas
-                              </p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {roleDoc.herramientas.map((item) => (
-                                  <span
-                                    key={item}
-                                    className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700 ring-1 ring-inset ring-slate-200"
+                        </section>
+
+                        <section className="overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm">
+                          <div className="flex items-center gap-2 border-b border-red-100 bg-red-50/70 px-4 py-2.5">
+                            <NotebookPen className="h-4 w-4 text-red-600" />
+                            <p className="text-xs font-semibold uppercase tracking-wide text-red-600">
+                              Observaciones
+                            </p>
+                            {observaciones.length > 0 && (
+                              <span className="ml-auto rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-600">
+                                {observaciones.length}
+                              </span>
+                            )}
+                          </div>
+                          {observaciones.length > 0 ? (
+                            <ul className="max-h-80 space-y-2 overflow-y-auto p-4">
+                              {observaciones.map((obs, index) => (
+                                <li
+                                  key={index}
+                                  className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+                                >
+                                  <p>{obs.text}</p>
+                                  <p className="mt-1 text-[11px] font-medium text-red-500">
+                                    {obs.chat.title || 'Sin título'} ·{' '}
+                                    {formatDate(obs.chat.updatedAt || obs.chat.createdAt)}
+                                  </p>
+                                </li>
+                              ))}
+                              {chats
+                                .filter((c) => c.esDolor && !(Array.isArray(c.notas) && c.notas.length > 0))
+                                .map((c) => (
+                                  <li
+                                    key={`dolor-${c.id}`}
+                                    className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
                                   >
-                                    {item}
-                                  </span>
+                                    <p>El usuario reportó un obstáculo en esta conversación.</p>
+                                    <p className="mt-1 text-[11px] font-medium text-red-500">
+                                      {c.title || 'Sin título'} ·{' '}
+                                      {formatDate(c.updatedAt || c.createdAt)}
+                                    </p>
+                                  </li>
                                 ))}
-                              </div>
+                            </ul>
+                          ) : (
+                            <div className="px-4 py-8 text-center text-sm text-slate-400">
+                              Sin observaciones registradas.
                             </div>
                           )}
-                          {roleDoc.interacciones.length > 0 && (
-                            <div>
-                              <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                <Network className="h-3.5 w-3.5" />
-                                Colabora con
-                              </p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {roleDoc.interacciones.map((item) => (
-                                  <span
-                                    key={item}
-                                    className="rounded-full bg-sky-50 px-2.5 py-1 text-xs text-sky-800 ring-1 ring-inset ring-sky-200"
-                                  >
-                                    {item}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                        </section>
+                      </div>
 
                       {chats.length === 0 ? (
                         <p className="px-4 py-5 text-center text-sm text-slate-400">
