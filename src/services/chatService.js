@@ -16,7 +16,7 @@ function buildReply(conversation, userName) {
   const greet = (body) => (name ? `${name}, ${body}` : body);
 
   if (/(hola|buenas|buenos días|buenas tardes|buenas noches)/.test(text)) {
-    return greet('hola, gracias por tu tiempo. Esto es una entrevista breve y confidencial sobre tu día a día en el trabajo. Para empezar: ¿qué es lo que más te costó o te frenó esta semana en tus tareas?');
+    return greet('hola, gracias por tu tiempo. Este es un espacio breve y confidencial para conocerte. Para empezar, cuéntame: ¿cuál es tu cargo y cuáles son las tareas principales que realizas?');
   }
 
   if (/(muchos problemas|tengo problemas|estoy mal|no sé qué hacer|no se que hacer)/.test(text)) {
@@ -48,10 +48,10 @@ function buildReply(conversation, userName) {
   }
 
   if (/(quién eres|quien eres|qué eres|que eres|sobre ti)/.test(text)) {
-    return 'Soy Mr Hunter, un entrevistador de clima laboral y procesos dentro de tu empresa. Estoy aquí para conocer cómo trabajas: qué obstáculos enfrentas, qué herramientas o procesos te frenan y qué mejoras crees que harían tu trabajo más fácil. ¿Por dónde quieres empezar?';
+    return 'Soy Mr Hunter, tu entrevistador laboral. Primero quiero conocer qué haces en tu trabajo: tu cargo, tus tareas y las herramientas que usas. Y cuando algo te frena o te genera malestar, me convierto en entrevistador de dolor para ayudarte a entender la causa. ¿Por dónde quieres empezar?';
   }
 
-  return greet('gracias por compartir. Quiero entender bien tu situación para ayudarte. Cuéntame con tus palabras: ¿qué es lo que más te está complicando o frenando en tu trabajo estos días, y desde cuándo?');
+  return greet('gracias por compartir. Para conocerte mejor, cuéntame con tus palabras: ¿cuál es tu cargo y qué tareas realizas en tu día a día?');
 }
 
 export async function sendMessage(conversation, onToken, onNotes, userName, organizacion) {

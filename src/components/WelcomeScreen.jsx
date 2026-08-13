@@ -5,10 +5,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { subscribeProfile } from '../services/profileService';
 
 const suggestions = [
+  'Quiero contarte mi cargo y mis tareas',
+  'Estas son las herramientas que uso a diario',
   'Me falta una herramienta para hacer mi trabajo',
   'Hay un proceso que se siente muy lento',
-  'Tengo una fricción con mi equipo',
   'La carga de trabajo es demasiado alta',
+  'Tengo una fricción con mi equipo',
 ];
 
 function firstName(name) {
@@ -42,9 +44,10 @@ export default function WelcomeScreen({ onPick }) {
           : 'Hola, soy Mr Hunter'}
       </h2>
       <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-500">
-        Soy Mr Hunter, tu entrevistador de clima laboral. Quiero conocer cómo trabajas cada día:
-        qué obstáculos te frenan, qué herramientas o procesos se sienten pesados y qué mejoras harían
-        tu trabajo más fácil. Nada de lo que compartas es juzgado. ¿Qué te está costando hoy?
+        Soy Mr Hunter, tu entrevistador laboral. Primero quiero conocerte: cuéntame cuál es tu
+        cargo y qué tareas realizas. Y cuando algo te frena o te genera malestar, me convierto en
+        entrevistador de dolor para ayudarte a entender la causa. Nada de lo que compartas es
+        juzgado. ¿Cómo empezamos?
       </p>
 
       <div className="mt-8 grid w-full max-w-2xl gap-3 sm:grid-cols-2">
