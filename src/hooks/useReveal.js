@@ -6,8 +6,10 @@ export function useReveal() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('reveal-visible');
-            observer.unobserve(entry.target);
+            const el = entry.target;
+            el.style.animation = 'reveal 0.7s ease-out forwards';
+            el.style.opacity = '1';
+            observer.unobserve(el);
           }
         });
       },

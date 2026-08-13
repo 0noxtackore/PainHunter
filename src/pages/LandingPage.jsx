@@ -7,6 +7,8 @@ import {
   Brain,
   Check,
   ChevronDown,
+  FileText,
+  Handshake,
   HeartPulse,
   Menu,
   MessageCircle,
@@ -56,6 +58,16 @@ const FEATURES = [
     icon: Award,
     title: 'Desbloquea trofeos',
     text: 'Sube de nivel y desbloquea trofeos a medida que conversas, compartes tus obstáculos y mantienes tu constancia.',
+  },
+  {
+    icon: FileText,
+    title: 'Registro de tu rol',
+    text: 'Mr Hunter documenta tu cargo, tus tareas principales y las herramientas que usas, para conocer bien qué haces en la empresa.',
+  },
+  {
+    icon: Handshake,
+    title: 'Ayuda a tu líder',
+    text: 'Con la documentación de tu rol, tu líder conoce con claridad qué hace cada persona del equipo y puede apoyarte mejor en tu día a día.',
   },
 ];
 
