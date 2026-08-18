@@ -18,22 +18,38 @@ const SYSTEM_PROMPT = [
   'UNA pregunta abierta a la vez.',
   '\n\nMODO DOCUMENTACION (por defecto, al inicio):',
   '1) Apertura: saluda de forma profesional y cercana y explica que esta es una entrevista',
-  '   breve y confidencial para conocer su trabajo y luego su dia a dia.',
-  '2) Documenta su rol paso a paso, UNA pregunta a la vez:',
-  '   a) su puesto o cargo actual;',
-  '   b) sus responsabilidades y las 2 a 4 tareas principales que realiza;',
-  '   c) las herramientas, software o equipos que usa a diario;',
-  '   d) con que areas, departamentos o roles de la empresa interactua;',
-  '   e) como esta organizada su jornada y que tareas ocupan mas de su tiempo.',
+  '   confidencial para conocer a fondo su trabajo: su rol completo, sin apresurarse.',
+  '2) Explora el rol A FONDO, UNA pregunta a la vez, y NO te conformes con respuestas',
+  '   cortas: profundiza hasta agotar cada tema antes de pasar al siguiente. Cubre:',
+  '   a) PUESTO: cargo exacto, nivel o seniority, area a la que pertenece, a quien',
+  '      reporta y cuanto tiempo lleva en el puesto y en la empresa.',
+  '   b) RESPONSABILIDADES: las formales y las informales que asume, las 2 a 4 tareas',
+  '      principales y por que son criticas para el area.',
+  '   c) TAREAS: diarias, semanales y proyectos o hitos mensuales/trimestrales; que',
+  '      tareas consumen mas de su tiempo y cuales considera perdidas o repetitivas.',
+  '   d) HERRAMIENTAS: software, plataformas, equipos y accesos que usa; cual domina,',
+  '      cual le cuesta y como es el soporte o la gestion de licencias.',
+  '   e) PROCESOS: en que procesos clave participa, que entra y que sale de su trabajo,',
+  '      quien le entrega informacion, a quien se la pasa y que pasa cuando algo se atora.',
+  '   f) INTERACCIONES: con que areas, equipos o roles colabora; quien depende de su',
+  '      trabajo y de quien depende el; donde existen fricciones habituales.',
+  '   g) METAS: que espera la empresa de su puesto, como se mide su exito (indicadores,',
+  '      plazos, calidad) y que considera el mismo un buen resultado.',
+  '   h) JORNADA: como organiza su dia, que momentos son criticos y donde hay sobrecarga.',
+  '   i) MEJORAS: que cambios haria en su rol, procesos o herramientas si pudiera.',
   '3) Adapta tus preguntas al rol que la persona te dijo: en cuanto mencione su cargo, haz',
   '   preguntas profesionales y especificas de ese puesto. Por ejemplo, si es desarrollador',
-  '   pregunta por codigo, repositorios, despliegues y entornos; si es ventas, por CRM,',
-  '   pipeline y metas; si es RRHH, por reclutamiento, nomina y evaluaciones; si es soporte,',
-  '   por tickets y tiempos de respuesta; si es otra area, pregunta por sus procesos y',
+  '   pregunta por stack, repositorios, despliegues, deuda tecnica y entornos; si es ventas,',
+  '   por CRM, pipeline, metas y cifras; si es RRHH, por reclutamiento, nomina, evaluaciones;',
+  '   si es soporte, por tickets, SLA y picos de demanda; si es otra area, por sus procesos y',
   '   metricas tipicas. Nunca asumas datos que no te haya contado: usa lo que menciono como',
   '   base y pregunta con propiedad sobre su trabajo sin inventar realidades de la empresa.',
-  '4) Cierra la documentacion validando lo compartido y pregunta si hay algo en su dia a',
-  '   dia que le gustaria mejorar o cambiar.',
+  '4) Profundidad: tras cada respuesta relevante haz de 1 a 3 preguntas de seguimiento para',
+  '   completar detalles (frecuencias, numeros, ejemplos, responsables, consecuencias). El',
+  '   objetivo es que al final se pueda describir una TESIS completa del rol: que hace, como,',
+  '   con que, con quien, que esperan de el y donde le duele.',
+  '5) Solo cuando hayas recorrido todos los temas (nunca antes), cierra validando lo',
+  '   compartido y pregunta si hay algo en su dia a dia que le gustaria mejorar o cambiar.',
   '\n\nMODO DOLOR (se activa en plena conversacion cuando detectas un dolor u obstaculo):',
   'Cambia a este modo cuando el usuario mencione malestar u obstaculos en el trabajo, por',
   'ejemplo: "dolor", "duele", "cansancio", "agotado", "estres", "ansiedad", "presion",',
@@ -403,16 +419,19 @@ export async function generateConclusion(conversation, userName, organizacion) {
 
   const prompt =
     'Basandote en la siguiente conversacion de entrevista laboral, responde en espanol con un JSON valido y SIN ' +
-    'texto adicional, con exactamente estas ocho claves: "conclusion" (maximo 2 frases resumiendo la ' +
+    'texto adicional, con exactamente estas diez claves: "conclusion" (maximo 2 frases resumiendo la ' +
     'situacion del empleado en el trabajo: obstaculos, procesos, herramientas o clima que haya mencionado), ' +
     '"es_dolor" (true si la persona describio un problema real que afecte su trabajo o bienestar laboral y que ' +
     'merezca registrarse como nota; false en caso contrario), "recomendacion" (una unica recomendacion ' +
     'practica y accionable de maximo 2 frases, orientada a mejorar su trabajo o resolver el obstaculo), ' +
-    '"resumen_rol" (maximo 2 frases resumiendo el puesto y las responsabilidades del empleado segun lo que haya ' +
-    'contado; usa "" si no compartio nada al respecto), "tareas_principales" (lista de texto con las 2 a 4 ' +
-    'tareas principales que realiza; lista vacia si no las menciono), "herramientas" (lista de herramientas, ' +
-    'software o equipos que usa en su trabajo; lista vacia si no menciono ninguna) e "interacciones" (lista de ' +
-    'areas, departamentos o roles con los que colabora; lista vacia si no menciono ninguna) e "importante" ' +
+    '"resumen_rol" (entre 2 y 4 frases formando una mini tesis del puesto: que hace, con que, con quien, ' +
+    'que esperan de el y que dificultades tiene; usa "" si no compartio nada al respecto), ' +
+    '"tareas_principales" (lista de texto con las 2 a 4 tareas principales que realiza; lista vacia si no ' +
+    'las menciono), "herramientas" (lista de herramientas, software o equipos que usa; lista vacia si no ' +
+    'menciono ninguna), "interacciones" (lista de areas, departamentos o roles con los que colabora; lista ' +
+    'vacia si no menciono ninguna), "procesos" (lista de texto con los procesos clave en los que participa y ' +
+    'su papel en cada uno; lista vacia si no los menciono), "objetivos" (lista de texto con las metas, ' +
+    'indicadores o lo que se espera de su puesto; lista vacia si no lo menciono) e "importante" ' +
     '(true SOLO si la conversacion contiene informacion valiosa para el lider: un obstaculo o problema ' +
     'concreto, datos utiles del puesto del empleado, procesos, herramientas o fallas que merezcan revisarse; ' +
     'false si fue una charla casual, un saludo o no aporta datos de interes). ' +
@@ -436,6 +455,8 @@ export async function generateConclusion(conversation, userName, organizacion) {
     tareas_principales: [],
     herramientas: [],
     interacciones: [],
+    procesos: [],
+    objetivos: [],
     importante: false,
   };
   if (jsonMatch) {
@@ -499,5 +520,7 @@ export async function generateConclusion(conversation, userName, organizacion) {
     tareasPrincipales: normalizeList(result.tareas_principales),
     herramientas: normalizeList(result.herramientas),
     interacciones: normalizeList(result.interacciones),
+    procesos: normalizeList(result.procesos),
+    objetivos: normalizeList(result.objetivos),
   };
 }

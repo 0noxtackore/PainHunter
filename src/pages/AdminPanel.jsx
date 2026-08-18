@@ -14,7 +14,9 @@ import {
   NotebookPen,
   Search,
   Shield,
+  Target,
   Users,
+  Workflow,
   Wrench,
   X,
 } from 'lucide-react';
@@ -49,7 +51,14 @@ function formatDate(ts) {
 }
 
 function buildRoleDoc(chats) {
-  const doc = { resumenes: [], tareas: [], herramientas: [], interacciones: [] };
+  const doc = {
+    resumenes: [],
+    tareas: [],
+    herramientas: [],
+    interacciones: [],
+    procesos: [],
+    objetivos: [],
+  };
   const pushUnique = (arr, value) => {
     const text = String(value || '').trim();
     if (text && !arr.some((item) => item.toLowerCase() === text.toLowerCase())) arr.push(text);
@@ -64,6 +73,12 @@ function buildRoleDoc(chats) {
     );
     (Array.isArray(chat.interacciones) ? chat.interacciones : []).forEach((value) =>
       pushUnique(doc.interacciones, value)
+    );
+    (Array.isArray(chat.procesos) ? chat.procesos : []).forEach((value) =>
+      pushUnique(doc.procesos, value)
+    );
+    (Array.isArray(chat.objetivos) ? chat.objetivos : []).forEach((value) =>
+      pushUnique(doc.objetivos, value)
     );
   });
   return doc;
@@ -248,7 +263,9 @@ export default function AdminPanel() {
                 roleDoc.resumenes.length > 0 ||
                 roleDoc.tareas.length > 0 ||
                 roleDoc.herramientas.length > 0 ||
-                roleDoc.interacciones.length > 0;
+                roleDoc.interacciones.length > 0 ||
+                roleDoc.procesos.length > 0 ||
+                roleDoc.objetivos.length > 0;
               const observaciones = [];
               chats.forEach((c) => {
                 (Array.isArray(c.notas) ? c.notas : []).forEach((n) => {
@@ -395,6 +412,42 @@ export default function AdminPanel() {
                                       </span>
                                     ))}
                                   </div>
+                                </div>
+                              )}
+                              {roleDoc.procesos.length > 0 && (
+                                <div className="mt-2">
+                                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                    <Workflow className="h-3.5 w-3.5" />
+                                    Procesos clave
+                                  </p>
+                                  <ul className="space-y-1.5">
+                                    {roleDoc.procesos.map((item) => (
+                                      <li
+                                        key={item}
+                                        className="rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs text-violet-800"
+                                      >
+                                        {item}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              {roleDoc.objetivos.length > 0 && (
+                                <div className="mt-2">
+                                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                    <Target className="h-3.5 w-3.5" />
+                                    Metas e indicadores
+                                  </p>
+                                  <ul className="space-y-1.5">
+                                    {roleDoc.objetivos.map((item) => (
+                                      <li
+                                        key={item}
+                                        className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs text-emerald-800"
+                                      >
+                                        {item}
+                                      </li>
+                                    ))}
+                                  </ul>
                                 </div>
                               )}
                             </div>

@@ -101,6 +101,10 @@ export default function AuthPage({ mode }) {
       setError({ message: 'Escribe el nombre de tu empresa u organización.' });
       return;
     }
+    if (isRegister && role === 'empleado' && !cargo.trim()) {
+      setError({ message: 'Escribe tu cargo o puesto para registrar tu cuenta.' });
+      return;
+    }
     setError(null);
     setBusy(true);
     try {
@@ -261,7 +265,7 @@ export default function AuthPage({ mode }) {
               )}
 
               {isRegister && role === 'empleado' && (
-                <Field label="Cargo / Puesto (opcional)">
+                <Field label="Cargo / Puesto">
                   <div className="relative">
                     <Briefcase className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
@@ -270,6 +274,7 @@ export default function AuthPage({ mode }) {
                       value={cargo}
                       onChange={(event) => setCargo(event.target.value)}
                       placeholder="Ej. Desarrollador, Ventas, RRHH…"
+                      required
                       className={inputClass}
                     />
                   </div>
