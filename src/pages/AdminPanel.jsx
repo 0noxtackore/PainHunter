@@ -765,28 +765,90 @@ export default function AdminPanel() {
       )}
 
       {selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setSelectedUser(null)}>
-          <div className="mx-4 w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm py-6 overflow-y-auto" onClick={() => setSelectedUser(null)}>
+          <div className="mx-4 w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white shadow-md">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-xl font-bold text-white shadow-lg shadow-brand-500/20">
                   {(selectedUser.name || '?').charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">{selectedUser.name}</h3>
-                  <p className="text-xs text-slate-500">{selectedUser.email} · {selectedUser.role || 'empleado'} · {selectedUser.organizacion}</p>
+                  <h3 className="text-xl font-extrabold text-slate-900 leading-tight">{selectedUser.name}</h3>
+                  <div className="flex flex-wrap gap-2 text-xs text-slate-500 mt-1">
+                    <span>{selectedUser.email}</span><span>·</span><span className="font-semibold text-brand-600">{selectedUser.role || 'empleado'}</span><span>·</span><span>{selectedUser.organizacion || 'RRIntec'}</span>
+                  </div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">{selectedUser.gender || '—'} · Creado: {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : '—'}</div>
                 </div>
               </div>
-              <button onClick={() => setSelectedUser(null)} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200" aria-label="Cerrar">✕</button>
+              <button onClick={() => setSelectedUser(null)} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-red-50 hover:text-red-500 transition" aria-label="Cerrar">✕</button>
             </div>
-            <div className="space-y-3 text-sm text-slate-700">
-              <div className="rounded-xl bg-slate-50 p-3"><span className="font-semibold text-slate-900">Rol:</span> {selectedUser.role || '—'}</div>
-              <div className="rounded-xl bg-slate-50 p-3"><span className="font-semibold text-slate-900">Organización:</span> {selectedUser.organizacion || '—'}</div>
-              <div className="rounded-xl bg-slate-50 p-3"><span className="font-semibold text-slate-900">Conversaciones:</span> {(conversationsByUser[selectedUser.uid] || []).length}</div>
-              <div className="rounded-xl bg-slate-50 p-3"><span className="font-semibold text-slate-900">Notas / Obstáculos:</span> {conversationsByUser[selectedUser.uid] ? conversationsByUser[selectedUser.uid].filter(c => c.esDolor || (Array.isArray(c.notas) && c.notas.length > 0)).length : 0}</div>
-              <div className="rounded-xl bg-amber-50 p-3"><span className="font-semibold text-amber-800">Estado:</span> {(conversationsByUser[selectedUser.uid] || []).some(c => c.esDolor) ? 'Con observaciones (requiere atención)' : 'Sin observaciones críticas'}</div>
+
+            <div className="max-h-[60vh] overflow-y-auto pr-1 space-y-4">
+              {/* Datos de usuario completos */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="rounded-xl bg-slate-50 p-3"><span className="text-[10px] uppercase font-bold text-slate-400">Nombre</span><div className="font-semibold text-sm">{selectedUser.name || '—'}</div></div>
+                <div className="rounded-xl bg-slate-50 p-3"><span className="text-[10px] uppercase font-bold text-slate-400">Rol</span><div className="font-semibold text-sm text-brand-700">{selectedUser.role || '—'}</div></div>
+                <div className="rounded-xl bg-slate-50 p-3"><span className="text-[10px] uppercase font-bold text-slate-400">Organización</span><div className="font-semibold text-sm">{selectedUser.organizacion || '—'}</div></div>
+                <div className="rounded-xl bg-slate-50 p-3"><span className="text-[10px] uppercase font-bold text-slate-400">Género</span><div className="font-semibold text-sm">{selectedUser.gender || '—'}</div></div>
+                <div className="rounded-xl bg-slate-50 p-3 col-span-2"><span className="text-[10px] uppercase font-bold text-slate-400">Correo</span><div className="font-semibold text-sm">{selectedUser.email || '—'}</div></div>
+                <div className="rounded-xl bg-slate-50 p-3"><span className="text-[10px] uppercase font-bold text-slate-400">UID</span><div className="font-mono text-xs">{selectedUser.uid || '—'}</div></div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-3">
+                <h4 className="font-extrabold text-slate-900 flex items-center gap-2 mb-3"><MessageSquare className="h-4 w-4 text-brand-600" /> Conversaciones ({(conversationsByUser[selectedUser.uid] || []).length})</h4>
+                {(conversationsByUser[selectedUser.uid] || []).length === 0 && <p className="text-sm text-slate-400">Sin conversaciones registradas.</p>}
+              </div>
+
+              {(conversationsByUser[selectedUser.uid] || []).map((chat, idx) => (
+                <div key={chat.id || idx} className={`rounded-2xl border p-4 ${chat.esDolor ? 'border-red-200 bg-gradient-to-br from-red-50 to-white' : 'border-slate-200 bg-white'}`}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <h5 className="font-bold text-slate-900">{chat.title || 'Entrevista'}</h5>
+                      <span className="text-[11px] text-slate-400">{chat.createdAt ? new Date(chat.createdAt).toLocaleString() : '—'}</span>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold shadow-sm ${chat.esDolor ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>{chat.esDolor ? 'Obstáculo detectado' : 'Sin obstáculos'}</span>
+                  </div>
+
+                  {/* Mensajes */}
+                  <div className="mb-3 space-y-2">
+                    <span className="text-[10px] font-extrabold uppercase text-slate-400">Mensajes</span>
+                    {(Array.isArray(chat.messages) && chat.messages.length > 0) ? chat.messages.map((m, mi) => (
+                      <div key={m.id || mi} className={`rounded-xl px-3 py-2 text-sm ${m.role === 'user' ? 'bg-brand-50 text-brand-900 ml-auto max-w-[90%] text-right' : 'bg-slate-100 text-slate-800 max-w-[90%]'}`}>
+                        <span className="text-[10px] font-bold opacity-60 block">{m.role === 'user' ? 'Usuario' : 'Asistente'}</span>
+                        {m.content || '—'}
+                      </div>
+                    )) : <p className="text-xs text-slate-300">Sin mensajes.</p>}
+                  </div>
+
+                  {/* Notas */}
+                  <div className="mb-3">
+                    <span className="text-[10px] font-extrabold uppercase text-amber-500">Notas / Observaciones</span>
+                    {(Array.isArray(chat.notas) && chat.notas.length > 0) ? chat.notas.map((n, ni) => (
+                      <div key={ni} className="mt-1 rounded-lg bg-amber-50 border border-amber-100 px-2 py-1 text-xs text-amber-800">{n.text}</div>
+                    )) : <p className="text-xs text-slate-300">Sin notas.</p>}
+                  </div>
+
+                  {/* Datos resumidos */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    {chat.conclusion && (<div className="rounded-lg bg-blue-50 px-2 py-1"><span className="font-bold text-blue-800">Conclusión:</span> {chat.conclusion}</div>)}
+                    {chat.recomendacion && (<div className="rounded-lg bg-violet-50 px-2 py-1"><span className="font-bold text-violet-800">Recomendación:</span> {chat.recomendacion}</div>)}
+                    {chat.resumenRol && (<div className="rounded-lg bg-slate-50 px-2 py-1"><span className="font-bold text-slate-700">Resumen rol:</span> {chat.resumenRol}</div>)}
+                  </div>
+
+                  {/* Listas */}
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    {chat.tareasPrincipales && Array.isArray(chat.tareasPrincipales) && chat.tareasPrincipales.length > 0 && (<div><span className="font-bold text-slate-700">Tareas:</span> {chat.tareasPrincipales.join(', ')}</div>)}
+                    {chat.herramientas && Array.isArray(chat.herramientas) && chat.herramientas.length > 0 && (<div><span className="font-bold text-slate-700">Herramientas:</span> {chat.herramientas.join(', ')}</div>)}
+                    {chat.interacciones && Array.isArray(chat.interacciones) && chat.interacciones.length > 0 && (<div><span className="font-bold text-slate-700">Interacciones:</span> {chat.interacciones.join(', ')}</div>)}
+                    {chat.procesos && Array.isArray(chat.procesos) && chat.procesos.length > 0 && (<div><span className="font-bold text-slate-700">Procesos:</span> {chat.procesos.join(', ')}</div>)}
+                    {chat.objetivos && Array.isArray(chat.objetivos) && chat.objetivos.length > 0 && (<div><span className="font-bold text-slate-700">Objetivos:</span> {chat.objetivos.join(', ')}</div>)}
+                    <div><span className="font-bold text-slate-700">Importante:</span> {chat.importante ? 'Sí' : 'No'}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <button onClick={() => setSelectedUser(null)} className="mt-5 w-full rounded-xl bg-brand-600 py-2.5 font-medium text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-700">Cerrar</button>
+
+            <button onClick={() => setSelectedUser(null)} className="mt-6 w-full rounded-xl bg-brand-600 py-3 font-bold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-700">Cerrar panel</button>
           </div>
         </div>
       )}
