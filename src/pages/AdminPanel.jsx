@@ -225,6 +225,36 @@ export default function AdminPanel() {
         ))}
       </div>
 
+      {/* Reportes y gráficos */}
+      <div className="grid gap-4 border-b border-slate-200 bg-gradient-to-br from-slate-50 to-white px-4 py-5 sm:grid-cols-2 sm:px-6">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h4 className="mb-3 text-sm font-bold text-slate-900">Conversaciones por empleado</h4>
+          <div className="space-y-2">
+            {users.slice(0, 8).map((u) => {
+              const chats = conversationsByUser[u.uid]?.length || 0;
+              const pct = Math.min(100, chats * 10);
+              return (
+                <div key={u.uid} className="flex items-center gap-2 text-xs">
+                  <span className="w-16 truncate text-slate-600">{u.name || '?'} </span>
+                  <div className="h-3 flex-1 rounded-full bg-slate-100 overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-600" style={{ width: pct + '%' }} /></div>
+                  <span className="w-6 text-right font-semibold text-slate-700">{chats}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h4 className="mb-3 text-sm font-bold text-slate-900">Estado de conversaciones</h4>
+          <div className="flex items-center gap-4">
+            <div className="relative h-24 w-24 rounded-full bg-gradient-to-tr from-red-400 via-amber-300 to-emerald-400 shadow-inner" />
+            <div className="space-y-1 text-sm">
+              <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-500" /> Con obstáculos: <b>{Object.values(conversationsByUser).reduce((s, arr) => s + (arr?.filter(c => c.esDolor).length || 0), 0)}</b></div>
+              <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Sin obstáculos: <b>{Object.values(conversationsByUser).reduce((s, arr) => s + (arr?.filter(c => !c.esDolor).length || 0), 0)}</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-center gap-2 border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
         <div className="mx-auto flex w-full max-w-4xl items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 transition focus-within:border-brand-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-500/15">
           <Search className="h-4 w-4 shrink-0 text-slate-400" />
