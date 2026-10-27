@@ -106,6 +106,7 @@ export default function AdminPanel() {
   const [expandedChat, setExpandedChat] = useState(null);
   const [showAllChats, setShowAllChats] = useState(false);
   const [filterRole, setFilterRole] = useState('todos');
+  const [viewChat, setViewChat] = useState(null);
   const [importing, setImporting] = useState(false);
 
   useEffect(() => subscribeAllUsers(setUsers, organizacion), [organizacion]);
