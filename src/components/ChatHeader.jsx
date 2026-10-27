@@ -36,11 +36,19 @@ function useServerStatus() {
   return status;
 }
 
-export default function ChatHeader({ notas }) {
+export default function ChatHeader({ notas, messages }) {
   const status = useServerStatus();
 
   const dot = status === 'online' ? 'bg-emerald-500' : 'bg-amber-500';
   const label = status === 'online' ? 'En línea' : 'Reconectando…';
+
+  const hasNotes = notas && notas.length > 0;
+  const lastUserContent = (messages || [])
+    .filter((m) => m.role === 'user')
+    .slice(-1)[0]?.content || '';
+  const isDolor = hasNotes || /(dolor|cansancio|agotamiento|conflicto|frustración|problema|frena|falla|lento|sobrecarga)/i.test(lastUserContent);
+  const modoLabel = isDolor ? 'Modo Dolor' : 'Modo Entrevista';
+  const modoColor = isDolor ? 'bg-rose-50 text-rose-700 ring-rose-200' : 'bg-brand-50 text-brand-700 ring-brand-100';
 
   return (
     <header className="hidden h-16 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 sm:flex sm:px-6">
@@ -59,6 +67,9 @@ export default function ChatHeader({ notas }) {
             {notas.length} {notas.length === 1 ? 'nota' : 'notas'}
           </div>
         )}
+        <span className={`rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset ${modoColor}`}>
+          {modoLabel}
+        </span>
         <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600 ring-1 ring-inset ring-brand-100">
           PainHunter
         </span>

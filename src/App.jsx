@@ -70,7 +70,7 @@ export default function App() {
           </button>
         </div>
         <div className="hidden" />
-        <ChatHeader notas={notas} />
+        <ChatHeader notas={notas} messages={messages} />
         <GamificationBar gamification={gamification} pending={gamificationPending} />
         {messages.length > 0 ? (
           <Messages messages={messages} loading={loading} />

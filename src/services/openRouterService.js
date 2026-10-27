@@ -1,10 +1,4 @@
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '';
-const MODEL = import.meta.env.VITE_OPENROUTER_MODEL || 'google/gemma-4-31b-it:free';
-const FALLBACK_MODELS = [
-  'google/gemma-4-31b-it:free',
-  'google/gemma-4-26b-a4b-it:free',
-].filter((model) => model !== MODEL);
+const LOCAL_URL = 'http://localhost:8000';
 
 const SYSTEM_PROMPT = [
   'Eres Mr Hunter, un entrevistador laboral dentro de una empresa con dos modos.',
@@ -228,159 +222,108 @@ function isRetryableStatus(status) {
 }
 
 async function fetchCompletion(messages, options = {}) {
-  const models = [options.model || MODEL, ...FALLBACK_MODELS];
-  let lastError = null;
-
-  for (const model of models) {
-    try {
-      const response = await fetch(OPENROUTER_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${API_KEY}`,
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'PainHunter',
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          temperature: options.temperature ?? 0.7,
-          max_tokens: options.maxTokens ?? 512,
-          top_p: options.topP ?? 0.9,
-          stream: false,
-        }),
-      });
-      if (!response.ok) {
-        if (isRetryableStatus(response.status)) {
-          lastError = new Error(`OpenRouter respondio ${response.status}`);
-          continue;
-        }
-        const detail = await response.text().catch(() => '');
-        throw new Error(`OpenRouter respondio ${response.status}: ${detail.slice(0, 200)}`);
-      }
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content || '';
-      if (content.trim()) return content;
-      lastError = new Error('Respuesta vacia');
-    } catch (error) {
-      lastError = error;
-      if (!isRetryableStatus(Number(error.message.match(/\d+/)?.[0]))) {
-        throw error;
-      }
+  try {
+    const response = await fetch(`${LOCAL_URL}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages,
+        user_name: '',
+      }),
+    });
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      throw new Error(`Servidor local respondio ${response.status}: ${detail.slice(0, 200)}`);
     }
+    const data = await response.json();
+    const content = data.content || '';
+    if (content.trim()) return content;
+    throw new Error('Respuesta vacia');
+  } catch (error) {
+    throw error;
   }
-  throw lastError || new Error('Todos los modelos fallaron');
 }
 
 export async function streamReply(conversation, onToken, onNotes, userName, organizacion) {
-  if (!API_KEY) {
-    onToken(
-      'No he podido conectarme: falta la clave de OpenRouter. Añádela como VITE_OPENROUTER_API_KEY en tu archivo .env.'
-    );
-    return;
-  }
-
   const messages = buildMessages(conversation, userName, organizacion);
-  const models = [MODEL, ...FALLBACK_MODELS];
-  let lastError = null;
+  try {
+    const response = await fetch(`${LOCAL_URL}/api/chat/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, user_name: userName || '' }),
+    });
+    if (!response.ok) throw new Error(`Servidor local respondio ${response.status}`);
+    if (!response.body) throw new Error('Sin flujo de datos');
 
-  for (const model of models) {
-    try {
-      const response = await fetch(OPENROUTER_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${API_KEY}`,
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'PainHunter',
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          temperature: 0.6,
-          max_tokens: 96,
-          top_p: 0.85,
-          stream: true,
-        }),
-      });
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    const MARKER = '###NOTAS###';
+    const MARKER_LEN = MARKER.length;
+    let buffer = '';
+    let content = '';
+    let receivedAny = false;
+    let emittedLength = 0;
 
-      if (!response.ok) {
-        lastError = new Error(`OpenRouter respondio ${response.status}`);
-        if (isRetryableStatus(response.status)) continue;
-        const detail = await response.text().catch(() => '');
-        throw new Error(`OpenRouter respondio ${response.status}: ${detail.slice(0, 200)}`);
-      }
-      if (!response.body) throw new Error('Sin flujo de datos');
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      const MARKER = '###NOTAS###';
-      const MARKER_LEN = MARKER.length;
-      let buffer = '';
-      let content = '';
-      let receivedAny = false;
-      let emittedLength = 0;
+      let separator;
+      while ((separator = buffer.indexOf('\n\n')) !== -1) {
+        const event = buffer.slice(0, separator);
+        buffer = buffer.slice(separator + 2);
+        const line = event.trim();
+        if (!line.startsWith('data:')) continue;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
+        const payload = line.slice(5).trim();
+        if (payload === '[DONE]') continue;
 
-        let separator;
-        while ((separator = buffer.indexOf('\n\n')) !== -1) {
-          const event = buffer.slice(0, separator);
-          buffer = buffer.slice(separator + 2);
-          const line = event.trim();
-          if (!line.startsWith('data:')) continue;
-
-          const payload = line.slice(5).trim();
-          if (payload === '[DONE]') continue;
-
-          try {
-            const data = JSON.parse(payload);
-            const delta = data.choices?.[0]?.delta?.content;
-            if (delta) {
-              receivedAny = true;
-              content += delta;
-              const markerIndex = content.indexOf(MARKER);
-              const visibleEnd =
-                markerIndex !== -1
-                  ? markerIndex
-                  : Math.max(0, content.length - (MARKER_LEN - 1));
-              if (visibleEnd > emittedLength) {
-                onToken(content.slice(emittedLength, visibleEnd));
-                emittedLength = visibleEnd;
-              }
+        try {
+          const data = JSON.parse(payload);
+          if (data.content !== undefined) {
+            receivedAny = true;
+            content += data.content;
+            const markerIndex = content.indexOf(MARKER);
+            const visibleEnd =
+              markerIndex !== -1
+                ? markerIndex
+                : Math.max(0, content.length - (MARKER_LEN - 1));
+            if (visibleEnd > emittedLength) {
+              onToken(content.slice(emittedLength, visibleEnd));
+              emittedLength = visibleEnd;
             }
-          } catch {
-            /* evento ignorado */
           }
+          if (data.notes && Array.isArray(data.notes) && data.notes.length > 0) {
+            if (onNotes) onNotes(data.notes);
+          }
+        } catch {
+          /* evento ignorado */
         }
-      }
-
-      if (!content.includes(MARKER) && emittedLength < content.length) {
-        onToken(content.slice(emittedLength));
-        emittedLength = content.length;
-      }
-
-      if (content.trim()) {
-        const { notes } = parseNotes(content);
-        if (notes.length > 0 && onNotes) onNotes(notes);
-        else {
-          const fallback = fallbackNotes(conversation);
-          if (fallback.length > 0 && onNotes) onNotes(fallback);
-        }
-        return;
-      }
-      lastError = new Error('Respuesta vacia');
-    } catch (error) {
-      lastError = error;
-      if (!isRetryableStatus(Number(error.message.match(/\d+/)?.[0]))) {
-        throw error;
       }
     }
+
+    if (!content.includes(MARKER) && emittedLength < content.length) {
+      onToken(content.slice(emittedLength));
+      emittedLength = content.length;
+    }
+
+    if (content.trim()) {
+      if (!content.includes(MARKER) && emittedLength < content.length && onToken) {
+        onToken(content.slice(emittedLength));
+      }
+      const { notes } = parseNotes(content);
+      if (notes.length > 0 && onNotes) onNotes(notes);
+      else {
+        const fallback = fallbackNotes(conversation);
+        if (fallback.length > 0 && onNotes) onNotes(fallback);
+      }
+      return;
+    }
+    throw new Error('Respuesta vacia');
+  } catch (error) {
+    throw error;
   }
-  throw lastError || new Error('Todos los modelos fallaron');
 }
 
 export async function generateTitle(conversation) {

@@ -9,51 +9,6 @@ function getLastUserMessage(conversation) {
   return '';
 }
 
-function buildReply(conversation, userName) {
-  const text = getLastUserMessage(conversation).toLowerCase();
-  const name = (userName || '').trim().split(/\s+/)[0];
-
-  const greet = (body) => (name ? `${name}, ${body}` : body);
-
-  if (/(hola|buenas|buenos días|buenas tardes|buenas noches)/.test(text)) {
-    return greet('hola, gracias por tu tiempo. Este es un espacio breve y confidencial para conocerte. Para empezar, cuéntame: ¿cuál es tu cargo y cuáles son las tareas principales que realizas?');
-  }
-
-  if (/(muchos problemas|tengo problemas|estoy mal|no sé qué hacer|no se que hacer)/.test(text)) {
-    return greet('te escucho y quiero ayudarte a despejar eso. Parece que hay varios frentes abiertos. Dime cuál es el obstáculo que más te está frenando ahora mismo en tu trabajo y de ese empezamos, para no cargar todo de golpe.');
-  }
-
-  if (/(cansancio|agot|fatiga|cansa|agobiad)/.test(text)) {
-    return greet('entendido. Ese agotamiento suele tener una causa concreta en el día a día. Cuéntame: ¿qué tarea o momento de la jornada te agota más, y qué crees que lo causa?');
-  }
-
-  if (/(trabajo|empleo|jefe|oficina|comput|pc|ordenador)/.test(text)) {
-    return greet('gracias por compartirlo. Quiero entender mejor cómo se trabaja por ahí: ¿qué es lo que más te frena o te complica hoy: las herramientas, los procesos, la carga o la comunicación con tu jefe o el equipo?');
-  }
-
-  if (/(perdi|pérdida|perdida|perder|duelo)/.test(text)) {
-    return greet('gracias por contármelo, y lamento que estés pasando por eso. En el contexto del trabajo: ¿de qué manera esta situación te está afectando tu concentración o tu desempeño estos días?');
-  }
-
-  if (/(conflicto|enemistad|discu|pelea|relación|relacion)/.test(text)) {
-    return greet('las fricciones entre compañeros o áreas afectan mucho el flujo del trabajo. Cuéntame: ¿con quién o qué área se genera ese conflicto y en qué parte del proceso aparecen los roces?');
-  }
-
-  if (/(dolor|me duele)/.test(text)) {
-    return greet('gracias por decírmelo. Quiero entender el impacto en tu trabajo: ¿ese malestar te está limitando alguna tarea o actividad específica estos días?');
-  }
-
-  if (/(gracias|perfecto|genial|excelente|great)/.test(text)) {
-    return greet('gracias a ti por tu tiempo y tu franqueza. Lo que compartiste ayuda a entender mejor el clima del equipo. Si quieres, seguimos profundizando o cerramos aquí la entrevista por hoy. ¿Cómo prefieres continuar?');
-  }
-
-  if (/(quién eres|quien eres|qué eres|que eres|sobre ti)/.test(text)) {
-    return 'Soy Mr Hunter, tu entrevistador laboral. Primero quiero conocer qué haces en tu trabajo: tu cargo, tus tareas y las herramientas que usas. Y cuando algo te frena o te genera malestar, me convierto en entrevistador de dolor para ayudarte a entender la causa. ¿Por dónde quieres empezar?';
-  }
-
-  return greet('gracias por compartir. Para conocerte mejor, cuéntame con tus palabras: ¿cuál es tu cargo y qué tareas realizas en tu día a día?');
-}
-
 export async function sendMessage(conversation, onToken, onNotes, userName, organizacion) {
   let receivedAny = false;
   const wrappedToken = (token) => {
@@ -75,7 +30,7 @@ export async function sendMessage(conversation, onToken, onNotes, userName, orga
   }
 
   await sleep(400);
-  onToken(buildReply(conversation, userName));
+  throw new Error('El entrevistador (Mr Hunter) no pudo responder tras varios intentos. Inténtalo de nuevo en un momento.');
 }
 
 export async function transcribeAudio(blob) {
