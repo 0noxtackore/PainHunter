@@ -1,17 +1,33 @@
 {
   "rules": {
-    ".read": false,
-    ".write": false,
     "users": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'lider'",
       "$uid": {
-        ".read": "auth != null && (auth.uid == $uid || (root.child('users/'+auth.uid).exists() && root.child('users/'+auth.uid).child('role').val() == 'lider' && root.child('users/'+auth.uid).child('organizacion').val() == data.child('organizacion').val()))",
-        ".write": "auth != null && (auth.uid == $uid || (root.child('users/'+auth.uid).exists() && root.child('users/'+auth.uid).child('role').val() == 'lider' && root.child('users/'+auth.uid).child('organizacion').val() == data.child('organizacion').val()))"
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'lider')",
+        ".write": "auth != null && auth.uid === $uid"
       }
     },
     "conversations": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'lider'",
       "$uid": {
-        ".read": "auth != null && (auth.uid == $uid || (root.child('users/'+auth.uid).exists() && root.child('users/'+auth.uid).child('role').val() == 'lider' && root.child('users/'+auth.uid).child('organizacion').val() == root.child('users/'+$uid).child('organizacion').val()))",
-        ".write": "auth != null && (auth.uid == $uid || (root.child('users/'+auth.uid).exists() && root.child('users/'+auth.uid).child('role').val() == 'lider' && root.child('users/'+auth.uid).child('organizacion').val() == root.child('users/'+$uid).child('organizacion').val()))"
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'lider')",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "gamification": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'lider'",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'lider')",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "organizaciones": {
+      "$org": {
+        ".read": "auth != null && root.child('users').child(auth.uid).child('organizacion').val() === $org",
+        "lideres": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'lider' && root.child('users').child(auth.uid).child('organizacion').val() === $org",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
+        }
       }
     }
   }
