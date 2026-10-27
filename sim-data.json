@@ -1,0 +1,16 @@
+{
+  "rrintec-001": { "email": "anthony.gonzales@rrintec.com", "name": "Anthony Gonzales", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" },
+  "rrintec-002": { "email": "rosaura.parra@rrintec.com", "name": "Rosaura Parra", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "femenino" },
+  "rrintec-003": { "email": "nelson.quintero@rrintec.com", "name": "Nelson Quintero", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" },
+  "rrintec-004": { "email": "wilder.salazar@rrintec.com", "name": "Wilder Salazar", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" },
+  "rrintec-005": { "email": "harrys.rodriguez@rrintec.com", "name": "Harrys Rodriguez", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" },
+  "rrintec-006": { "email": "jose.morillo@rrintec.com", "name": "José Morillo", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" },
+  "rrintec-007": { "email": "jose.duarte@rrintec.com", "name": "José Duarte", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" },
+  "rrintec-008": { "email": "christopher.pena@rrintec.com", "name": "Christopher Peña", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" },
+  "rrintec-009": { "email": "jhonniel.querales@rrintec.com", "name": "Jhonniel Querales", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" },
+  "rrintec-010": { "email": "angel.reyes@rrintec.com", "name": "Ángel Reyes", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" },
+  "rrintec-011": { "email": "kimberly.mendoza@rrintec.com", "name": "Kimberly Mendoza", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "femenino" },
+  "rrintec-012": { "email": "ana.atencion@rrintec.com", "name": "Ana", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "femenino" },
+  "rrintec-013": { "email": "angello.programador@rrintec.com", "name": "Angello", "role": "empleado", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" },
+  "rrintec-lider": { "email": "lider@rrintec.com", "name": "Líder RRIntec", "role": "lider", "organizacion": "RRIntec", "createdAt": 1761570000000, "gender": "masculino" }
+}
