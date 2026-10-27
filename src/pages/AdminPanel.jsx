@@ -102,7 +102,6 @@ export default function AdminPanel() {
   usePageTitle('Panel de administración');
   const [conversationsByUser, setConversationsByUser] = useState({});
   const [search, setSearch] = useState('');
-  const [expandedUser, setExpandedUser] = useState(null);
   const [expandedChat, setExpandedChat] = useState(null);
   const [showAllChats, setShowAllChats] = useState(false);
   const [filterRole, setFilterRole] = useState('todos');
@@ -294,7 +293,6 @@ export default function AdminPanel() {
                   if (text) observaciones.push({ text: String(text).trim(), chat: c });
                 });
               });
-              const isOpen = expandedUser === profile.uid;
               const importantChats = chats.filter(isImportantChat);
               const visibleChats = showAllChats ? chats : importantChats;
 
@@ -302,16 +300,13 @@ export default function AdminPanel() {
                 <div
                   key={profile.uid}
                   onClick={() => setSelectedUser(profile)}
-                  className={`relative cursor-pointer rounded-3xl rounded-tl-md border bg-gradient-to-br ${hasNotas ? 'from-red-50 to-white border-red-200' : 'from-white to-slate-50 border-slate-200'} shadow-sm transition hover:shadow-md hover:-translate-y-0.5 ${isOpen ? 'border-brand-200 shadow-md ring-1 ring-brand-500/10' : ''}`}
+                  className={`relative cursor-pointer rounded-3xl rounded-tl-md border bg-gradient-to-br ${hasNotas ? 'from-red-50 to-white border-red-200' : 'from-white to-slate-50 border-slate-200'} shadow-sm transition hover:shadow-md hover:-translate-y-0.5`}
                 >
                   <span
                     aria-hidden
-                    className={`absolute -top-[7px] left-6 h-3.5 w-3.5 rotate-45 border-l border-t bg-white ${
-                      isOpen ? 'border-brand-200' : 'border-slate-200'
-                    }`}
+                    className={`absolute -top-[7px] left-6 h-3.5 w-3.5 rotate-45 border-l border-t bg-white border-slate-200`}
                   />
-                  <button
-                    onClick={() => setExpandedUser(isOpen ? null : profile.uid)}
+                  <div
                     className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-slate-50"
                   >
                     <div
@@ -350,362 +345,12 @@ export default function AdminPanel() {
                         {chats.length} {chats.length === 1 ? 'chat' : 'chats'}
                       </span>
                       <ChevronDown
-                        className={`h-4 w-4 text-slate-400 transition-transform ${
-                          isOpen ? 'rotate-180' : ''
-                        }`}
+                        className="h-4 w-4 text-slate-400"
                       />
                     </div>
-                  </button>
-
-                  {isOpen && (
-                    <div className="border-t border-slate-100 bg-slate-50/40">
-                      <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-2">
-                        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                          <div className="flex items-center gap-2 border-b border-brand-100 bg-brand-50/70 px-4 py-2.5">
-                            <Brain className="h-4 w-4 text-brand-700" />
-                            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">
-                              Información recopilada por la IA
-                            </p>
-                          </div>
-                          {hasRoleDoc ? (
-                            <div className="px-4 py-3">
-                              <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                <Briefcase className="h-3.5 w-3.5" />
-                                Documentación de rol
-                              </p>
-                              {roleDoc.resumenes.length > 0 && (
-                                <p className="mb-2 text-sm leading-relaxed text-slate-700">
-                                  {roleDoc.resumenes[roleDoc.resumenes.length - 1]}
-                                </p>
-                              )}
-                              {roleDoc.tareas.length > 0 && (
-                                <div className="mb-2">
-                                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                    <ListChecks className="h-3.5 w-3.5" />
-                                    Tareas principales
-                                  </p>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {roleDoc.tareas.map((item) => (
-                                      <span
-                                        key={item}
-                                        className="rounded-full bg-brand-50 px-2.5 py-1 text-xs text-brand-800 ring-1 ring-inset ring-brand-200"
-                                      >
-                                        {item}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {roleDoc.herramientas.length > 0 && (
-                                <div className="mb-2">
-                                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                    <Wrench className="h-3.5 w-3.5" />
-                                    Herramientas
-                                  </p>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {roleDoc.herramientas.map((item) => (
-                                      <span
-                                        key={item}
-                                        className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700 ring-1 ring-inset ring-slate-200"
-                                      >
-                                        {item}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {roleDoc.interacciones.length > 0 && (
-                                <div>
-                                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                    <Network className="h-3.5 w-3.5" />
-                                    Colabora con
-                                  </p>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {roleDoc.interacciones.map((item) => (
-                                      <span
-                                        key={item}
-                                        className="rounded-full bg-sky-50 px-2.5 py-1 text-xs text-sky-800 ring-1 ring-inset ring-sky-200"
-                                      >
-                                        {item}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {roleDoc.procesos.length > 0 && (
-                                <div className="mt-2">
-                                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                    <Workflow className="h-3.5 w-3.5" />
-                                    Procesos clave
-                                  </p>
-                                  <ul className="space-y-1.5">
-                                    {roleDoc.procesos.map((item) => (
-                                      <li
-                                        key={item}
-                                        className="rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs text-violet-800"
-                                      >
-                                        {item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                              {roleDoc.objetivos.length > 0 && (
-                                <div className="mt-2">
-                                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                    <Target className="h-3.5 w-3.5" />
-                                    Metas e indicadores
-                                  </p>
-                                  <ul className="space-y-1.5">
-                                    {roleDoc.objetivos.map((item) => (
-                                      <li
-                                        key={item}
-                                        className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs text-emerald-800"
-                                      >
-                                        {item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="px-4 py-8 text-center text-sm text-slate-400">
-                              Aún no hay información sobre el rol de este usuario en sus entrevistas.
-                            </div>
-                          )}
-                        </section>
-
-                        <section className="overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm">
-                          <div className="flex items-center gap-2 border-b border-red-100 bg-red-50/70 px-4 py-2.5">
-                            <NotebookPen className="h-4 w-4 text-red-600" />
-                            <p className="text-xs font-semibold uppercase tracking-wide text-red-600">
-                              Observaciones
-                            </p>
-                            {observaciones.length +
-                              chats.filter((c) => c.esDolor && !(Array.isArray(c.notas) && c.notas.length > 0))
-                                .length >
-                              0 && (
-                              <span className="ml-auto rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-600">
-                                {observaciones.length +
-                                  chats.filter((c) => c.esDolor && !(Array.isArray(c.notas) && c.notas.length > 0))
-                                    .length}
-                              </span>
-                            )}
-                          </div>
-                          {observaciones.length > 0 ? (
-                            <ul className="max-h-80 space-y-2 overflow-y-auto p-4">
-                              {observaciones.map((obs, index) => (
-                                <li
-                                  key={index}
-                                  className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
-                                >
-                                  <p>{obs.text}</p>
-                                  <p className="mt-1 text-[11px] font-medium text-red-500">
-                                    {obs.chat.title || 'Sin título'} ·{' '}
-                                    {formatDate(obs.chat.updatedAt || obs.chat.createdAt)}
-                                  </p>
-                                </li>
-                              ))}
-                              {chats
-                                .filter((c) => c.esDolor && !(Array.isArray(c.notas) && c.notas.length > 0))
-                                .map((c) => (
-                                  <li
-                                    key={`dolor-${c.id}`}
-                                    className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
-                                  >
-                                    <p>El usuario reportó un obstáculo en esta conversación.</p>
-                                    <p className="mt-1 text-[11px] font-medium text-red-500">
-                                      {c.title || 'Sin título'} ·{' '}
-                                      {formatDate(c.updatedAt || c.createdAt)}
-                                    </p>
-                                  </li>
-                                ))}
-                            </ul>
-                          ) : (
-                            <div className="px-4 py-8 text-center text-sm text-slate-400">
-                              Sin observaciones registradas.
-                            </div>
-                          )}
-                        </section>
-                      </div>
-
-                      <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-white px-4 py-2">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          Conversaciones
-                        </p>
-                        {chats.length > 0 && (
-                          <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5 text-xs font-medium">
-                            <button
-                              onClick={() => setShowAllChats(false)}
-                              className={`rounded-md px-2.5 py-1 transition ${
-                                !showAllChats
-                                  ? 'bg-white text-brand-700 shadow-sm'
-                                  : 'text-slate-500 hover:text-slate-700'
-                              }`}
-                            >
-                              Importantes ({importantChats.length})
-                            </button>
-                            <button
-                              onClick={() => setShowAllChats(true)}
-                              className={`rounded-md px-2.5 py-1 transition ${
-                                showAllChats
-                                  ? 'bg-white text-brand-700 shadow-sm'
-                                  : 'text-slate-500 hover:text-slate-700'
-                              }`}
-                            >
-                              Todas ({chats.length})
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      {chats.length === 0 ? (
-                        <p className="px-4 py-5 text-center text-sm text-slate-400">
-                          Sin conversaciones aún.
-                        </p>
-                      ) : visibleChats.length === 0 ? (
-                        <p className="px-4 py-5 text-center text-sm text-slate-400">
-                          Ninguna conversación marcada como importante por la IA.
-                        </p>
-                      ) : (
-                        visibleChats.map((chat) => {
-                          const notas = Array.isArray(chat.notas) ? chat.notas : [];
-                          const chatOpen = expandedChat === `${profile.uid}:${chat.id}`;
-                          return (
-                            <div
-                              key={chat.id}
-                              className="border-b border-slate-100 last:border-0"
-                            >
-                              <div className="flex items-center gap-3 px-4 py-2.5 text-left transition hover:bg-white">
-                                <button
-                                  onClick={() =>
-                                    setExpandedChat(chatOpen ? null : `${profile.uid}:${chat.id}`)
-                                  }
-                                  className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                                >
-                                  <MessageSquare className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                                  <span className="min-w-0 flex-1">
-                                    <span className="flex items-center gap-2">
-                                      <span className="truncate text-sm font-medium">
-                                        {chat.title || 'Sin título'}
-                                      </span>
-                                      {chat.esDolor && (
-                                        <span className="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600 ring-1 ring-inset ring-red-200">
-                                          obstáculo
-                                        </span>
-                                      )}
-                                      {!chat.esDolor && notas.length > 0 && (
-                                        <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-bold text-red-600 ring-1 ring-inset ring-red-200">
-                                          {notas.length}
-                                        </span>
-                                      )}
-                                    </span>
-                                    {chat.conclusion && (
-                                      <span className="mt-0.5 flex items-start gap-1 text-xs text-slate-500">
-                                        <Brain className="mt-0.5 h-3 w-3 shrink-0 text-brand-500" />
-                                        <span className="line-clamp-2">{chat.conclusion}</span>
-                                      </span>
-                                    )}
-                                    <span className="mt-0.5 block text-[11px] text-slate-400">
-                                      {formatDate(chat.updatedAt || chat.createdAt)}
-                                    </span>
-                                  </span>
-                                  <ChevronDown
-                                    className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform ${
-                                      chatOpen ? 'rotate-180' : ''
-                                    }`}
-                                  />
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    setViewChat({
-                                      uid: profile.uid,
-                                      userName: profile.name || profile.email || 'Usuario',
-                                      chat,
-                                    })
-                                  }
-                                  className="flex shrink-0 items-center gap-1 rounded-lg bg-gradient-to-r from-brand-600 to-brand-700 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:from-brand-500 hover:to-brand-600"
-                                  title="Ver chat"
-                                >
-                                  <Eye className="h-3.5 w-3.5" />
-                                  <span className="hidden md:inline">Ver chat</span>
-                                </button>
-                              </div>
-
-                              {chatOpen && (
-                                <div className="space-y-3 px-4 py-4">
-                                  {notas.length > 0 && (
-                                    <div>
-                                      <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-600">
-                                        <NotebookPen className="h-3.5 w-3.5" />
-                                        Observaciones detectadas
-                                      </p>
-                                      <ul className="space-y-1.5">
-                                        {notas.map((nota, index) => (
-                                          <li
-                                            key={index}
-                                            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
-                                          >
-                                            {nota.text || nota}
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-
-                                  <div>
-                                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                      Diagnóstico de la conversación
-                                    </p>
-                                    {chat.conclusion ? (
-                                      <div className="overflow-hidden rounded-xl border border-brand-200 bg-white shadow-sm">
-                                        <div className="flex items-center justify-between gap-2 bg-brand-50/80 px-3 py-2">
-                                          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-700">
-                                            <Brain className="h-3.5 w-3.5" />
-                                            Conclusión de la IA
-                                          </p>
-                                          {chat.esDolor ? (
-                                            <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600 ring-1 ring-inset ring-red-200">
-                                              Hay obstáculo
-                                            </span>
-                                          ) : (
-                                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-600 ring-1 ring-inset ring-emerald-200">
-                                              Sin obstáculo
-                                            </span>
-                                          )}
-                                        </div>
-                                        <p className="px-3 py-2.5 text-sm leading-relaxed text-slate-800">
-                                          {chat.conclusion}
-                                        </p>
-                                        {chat.recomendacion && (
-                                          <div className="border-t border-emerald-200/70 bg-emerald-50/50 px-3 py-2.5">
-                                            <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                                              <Lightbulb className="h-3.5 w-3.5" />
-                                              Solución recomendada
-                                            </p>
-                                            <p className="text-sm leading-relaxed text-slate-700">
-                                              {chat.recomendacion}
-                                            </p>
-                                          </div>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <div className="rounded-xl border border-dashed border-slate-300 bg-white px-3 py-4 text-center text-xs text-slate-400">
-                                        Aún no hay conclusión para esta conversación. Se genera
-                                        cuando el usuario continúa el chat.
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  )}
+                  </div>
                 </div>
+
               );
             })}
           </div>
