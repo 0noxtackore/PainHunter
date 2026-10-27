@@ -107,69 +107,10 @@ export default function AdminPanel() {
   const [showAllChats, setShowAllChats] = useState(false);
   const [filterRole, setFilterRole] = useState('todos');
   const [viewChat, setViewChat] = useState(null);
-  const [importing, setImporting] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => subscribeAllUsers(setUsers, organizacion), [organizacion]);
   useEffect(() => subscribeAllConversations(setConversationsByUser, organizacion), [organizacion]);
-
-  const importRRIntec = async () => {
-    if (importing) return;
-    setImporting(true);
-    const list = [
-      { uid: 'rrintec-001', name: 'Anthony Gonzales', email: 'anthony.gonzales@rrintec.com', gender: 'masculino' },
-      { uid: 'rrintec-002', name: 'Rosaura Parra', email: 'rosaura.parra@rrintec.com', gender: 'femenino' },
-      { uid: 'rrintec-003', name: 'Nelson Quintero', email: 'nelson.quintero@rrintec.com', gender: 'masculino' },
-      { uid: 'rrintec-004', name: 'Wilder Salazar', email: 'wilder.salazar@rrintec.com', gender: 'masculino' },
-      { uid: 'rrintec-005', name: 'Harrys Rodriguez', email: 'harrys.rodriguez@rrintec.com', gender: 'masculino' },
-      { uid: 'rrintec-006', name: 'José Morillo', email: 'jose.morillo@rrintec.com', gender: 'masculino' },
-      { uid: 'rrintec-007', name: 'José Duarte', email: 'jose.duarte@rrintec.com', gender: 'masculino' },
-      { uid: 'rrintec-008', name: 'Christopher Peña', email: 'christopher.pena@rrintec.com', gender: 'masculino' },
-      { uid: 'rrintec-009', name: 'Jhonniel Querales', email: 'jhonniel.querales@rrintec.com', gender: 'masculino' },
-      { uid: 'rrintec-010', name: 'Ángel Reyes', email: 'angel.reyes@rrintec.com', gender: 'masculino' },
-      { uid: 'rrintec-011', name: 'Kimberly Mendoza', email: 'kimberly.mendoza@rrintec.com', gender: 'femenino' },
-    ];
-    try {
-      for (const p of list) {
-        await set(ref(rtdb, `users/${p.uid}`), {
-          email: p.email,
-          name: p.name,
-          role: 'empleado',
-          organizacion: 'RRIntec',
-          gender: p.gender,
-          createdAt: Date.now(),
-        });
-        const chatId = `${p.uid}-sim-1`;
-        await set(ref(rtdb, `conversations/${p.uid}/${chatId}`), {
-          id: chatId,
-          title: 'Entrevista laboral - RRIntec',
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-          messages: [
-            { id: 'm1', role: 'user', content: 'Quiero contarte mi cargo y mis tareas', createdAt: new Date().toISOString() },
-            { id: 'm2', role: 'assistant', content: 'Cuéntame con detalle cuál es tu cargo, a quién reportas y cuáles son tus tareas principales.', createdAt: new Date().toISOString() },
-            { id: 'm3', role: 'user', content: 'Realizo mis tareas diarias según lo que me asignan y hay momentos en los que me cuesta cumplir plazos por carga de trabajo.', createdAt: new Date().toISOString() },
-            { id: 'm4', role: 'assistant', content: 'Gracias por compartirlo. ¿Podrías decirme qué tarea te consume más tiempo actualmente y qué proceso te genera mayor demora?', createdAt: new Date().toISOString() },
-          ],
-          notas: [{ text: 'Menciona carga de trabajo y presión por plazos.' }],
-          esDolor: true,
-          conclusion: 'El empleado presenta carga de trabajo elevada y presión por plazos que afectan su ritmo diario.',
-          recomendacion: 'Revisar distribución de tareas y priorización con su líder para equilibrar la carga.',
-          resumenRol: 'Empleado de RRIntec con funciones operativas y presión por cumplimiento de plazos.',
-          tareasPrincipales: ['Tareas operativas asignadas'],
-          herramientas: [],
-          interacciones: ['Líder de equipo'],
-          procesos: ['Seguimiento de asignaciones'],
-          objetivos: ['Cumplir con plazos asignados'],
-          importante: true,
-        });
-      }
-      alert('Usuarios y conversaciones simuladas creadas para RRIntec.');
-    } catch (e) {
-      alert('Error: ' + (e.message || e));
-    } finally {
-      setImporting(false);
-    }
-  };
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -257,16 +198,6 @@ export default function AdminPanel() {
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
             {user?.email}
           </span>
-          {organizacion === 'RRIntec' && (
-            <button
-              onClick={importRRIntec}
-              disabled={importing}
-              className="flex items-center gap-1.5 rounded-lg bg-emerald-500/90 px-2.5 py-1.5 font-medium text-white transition hover:bg-emerald-400 disabled:opacity-50"
-            >
-              {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserPlus className="h-3.5 w-3.5" />}
-              {importing ? 'Importando...' : 'Importar RRIntec'}
-            </button>
-          )}
           <button
             onClick={logout}
             className="rounded-lg bg-white/10 px-2.5 py-1.5 font-medium text-white transition hover:bg-white/20"
@@ -370,7 +301,8 @@ export default function AdminPanel() {
               return (
                 <div
                   key={profile.uid}
-                  className={`relative rounded-3xl rounded-tl-md border bg-gradient-to-br ${hasNotas ? 'from-red-50 to-white border-red-200' : 'from-white to-slate-50 border-slate-200'} shadow-sm transition hover:shadow-md ${isOpen ? 'border-brand-200 shadow-md ring-1 ring-brand-500/10' : ''}`}
+                  onClick={() => setSelectedUser(profile)}
+                  className={`relative cursor-pointer rounded-3xl rounded-tl-md border bg-gradient-to-br ${hasNotas ? 'from-red-50 to-white border-red-200' : 'from-white to-slate-50 border-slate-200'} shadow-sm transition hover:shadow-md hover:-translate-y-0.5 ${isOpen ? 'border-brand-200 shadow-md ring-1 ring-brand-500/10' : ''}`}
                 >
                   <span
                     aria-hidden
@@ -828,6 +760,33 @@ export default function AdminPanel() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setSelectedUser(null)}>
+          <div className="mx-4 w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white shadow-md">
+                  {(selectedUser.name || '?').charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">{selectedUser.name}</h3>
+                  <p className="text-xs text-slate-500">{selectedUser.email} · {selectedUser.role || 'empleado'} · {selectedUser.organizacion}</p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedUser(null)} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200" aria-label="Cerrar">✕</button>
+            </div>
+            <div className="space-y-3 text-sm text-slate-700">
+              <div className="rounded-xl bg-slate-50 p-3"><span className="font-semibold text-slate-900">Rol:</span> {selectedUser.role || '—'}</div>
+              <div className="rounded-xl bg-slate-50 p-3"><span className="font-semibold text-slate-900">Organización:</span> {selectedUser.organizacion || '—'}</div>
+              <div className="rounded-xl bg-slate-50 p-3"><span className="font-semibold text-slate-900">Conversaciones:</span> {(conversationsByUser[selectedUser.uid] || []).length}</div>
+              <div className="rounded-xl bg-slate-50 p-3"><span className="font-semibold text-slate-900">Notas / Obstáculos:</span> {conversationsByUser[selectedUser.uid] ? conversationsByUser[selectedUser.uid].filter(c => c.esDolor || (Array.isArray(c.notas) && c.notas.length > 0)).length : 0}</div>
+              <div className="rounded-xl bg-amber-50 p-3"><span className="font-semibold text-amber-800">Estado:</span> {(conversationsByUser[selectedUser.uid] || []).some(c => c.esDolor) ? 'Con observaciones (requiere atención)' : 'Sin observaciones críticas'}</div>
+            </div>
+            <button onClick={() => setSelectedUser(null)} className="mt-5 w-full rounded-xl bg-brand-600 py-2.5 font-medium text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-700">Cerrar</button>
           </div>
         </div>
       )}
